@@ -1,0 +1,3 @@
+- use nextjs v15.3.1
+- use heroui v2.8.4
+- use pnpm

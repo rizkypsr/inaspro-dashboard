@@ -1,0 +1,261 @@
+{
+  "project": "Marketplace with Firestore + Xendit + Stock Sync + Advanced Features",
+  "database": {
+    "users": {
+      "userId": {
+        "name": "Rizky",
+        "email": "rizky@email.com",
+        "role": "user",
+        "createdAt": "timestamp",
+        "updatedAt": "timestamp",
+        "addresses": {
+          "addressId": {
+            "provinceId": "jakarta123",
+            "provinceName": "DKI Jakarta",
+            "fullAddress": "Jl. Sudirman No. 123, Jakarta Pusat",
+            "postalCode": "10210",
+            "isDefault": true,
+            "createdAt": "timestamp"
+          }
+        }
+      }
+    },
+    "categories": {
+      "categoryId": {
+        "name": "Shoes",
+        "slug": "shoes",
+        "description": "All types of shoes",
+        "image": "https://example.com/shoes.jpg",
+        "createdAt": "timestamp",
+        "updatedAt": "timestamp"
+      }
+    },
+    "products": {
+      "productId": {
+        "sku": "SKU-12345",
+        "title": "Nike Air Zoom",
+        "description": "Lightweight running shoes",
+        "basePrice": 1200000,
+        "stock": 50,
+        "categoryId": "shoesId",
+        "categoryName": "Shoes",
+        "images": [
+          "https://example.com/nike1.jpg",
+          "https://example.com/nike2.jpg"
+        ],
+        "createdAt": "timestamp",
+        "updatedAt": "timestamp",
+        "variants": {
+          "variantId": {
+            "name": "Nike Air Zoom - Red - 42",
+            "attributes": { "size": "42", "color": "Red" },
+            "price": 1250000,
+            "stock": 10,
+            "sku": "SKU-12345-RED42",
+            "createdAt": "timestamp",
+            "updatedAt": "timestamp"
+          }
+        }
+      }
+    },
+    "carts": {
+      "userId": {
+        "items": {
+          "itemId": {
+            "productId": "productId",
+            "variantId": "variantId",
+            "quantity": 2,
+            "price": 1250000,
+            "addedAt": "timestamp"
+          }
+        }
+      }
+    },
+    "orders": {
+      "orderId": {
+        "userId": "user123",
+        "items": [
+          {
+            "productId": "productId",
+            "variantId": "variantId",
+            "name": "Nike Air Zoom - Red - 42",
+            "sku": "SKU-12345-RED42",
+            "quantity": 2,
+            "price": 1250000,
+            "subtotal": 2500000
+          }
+        ],
+        "total": 2500000,
+        "discount": 250000,
+        "shippingCost": 50000,
+        "grandTotal": 2300000,
+        "reservedUntil": "timestamp",
+        "shippingAddress": {
+          "provinceId": "jakarta123",
+          "provinceName": "DKI Jakarta",
+          "fullAddress": "Jl. Sudirman No. 123, Jakarta Pusat",
+          "postalCode": "10210"
+        },
+        "logistics": {
+          "province": "Jakarta",
+          "price": 50000,
+          "trackingNumber": null,
+          "status": "pending"
+        },
+        "payment": {
+          "gateway": "xendit",
+          "xenditInvoiceId": "inv-123",
+          "status": "pending",
+          "paidAt": null
+        },
+        "status": "pending",
+        "createdAt": "timestamp",
+        "updatedAt": "timestamp"
+      }
+    },
+    "userOrders": {
+      "userId": {
+        "orders": {
+          "orderId": {
+            "refId": "orderId",
+            "status": "pending",
+            "grandTotal": 2300000,
+            "createdAt": "timestamp"
+          }
+        }
+      }
+    },
+    "vouchers": {
+      "voucherId": {
+        "code": "DISKON50",
+        "description": "50% off",
+        "discountType": "percent",
+        "value": 50,
+        "minPurchase": 100000,
+        "validFrom": "timestamp",
+        "validUntil": "timestamp",
+        "isActive": true,
+        "usageLimit": 100,
+        "usedCount": 20
+      }
+    },
+    "logistics": {
+      "provinceId": {
+        "name": "Jakarta",
+        "price": 50000
+      }
+    },
+    "notifications": {
+      "userId": {
+        "items": {
+          "notificationId": {
+            "type": "order_update",
+            "title": "Order #123 paid",
+            "message": "Your order has been successfully paid.",
+            "read": false,
+            "createdAt": "timestamp"
+          }
+        }
+      }
+    },
+    "salesReports": {
+      "2025-09-01": {
+        "totalOrders": 120,
+        "totalRevenue": 350000000,
+        "topProducts": [
+          { "productId": "p1", "sold": 50 },
+          { "productId": "p2", "sold": 30 }
+        ]
+      }
+    }
+  },
+  "tasks": {
+    "productManagement": [
+      "Admin dapat membuat, update, hapus product dengan variants.",
+      "Stock tersimpan di variants, total stock sync ke product.stock via Cloud Function.",
+      "Product bisa punya banyak gambar, SKU unik, dan kategori."
+    ],
+    "cart": [
+      "User dapat menambahkan product/variant ke cart.",
+      "Harga disimpan snapshot agar konsisten meskipun harga produk berubah.",
+      "Cart per user, bisa multi-device."
+    ],
+    "checkout": [
+      "Sebelum checkout, sistem wajib cek apakah user punya alamat default.",
+      "Jika tidak ada alamat, user harus isi alamat lengkap + pilih provinsi.",
+      "Ambil items dari cart.",
+      "Hitung total, apply voucher jika ada.",
+      "Tambahkan ongkos kirim dari logistics berdasarkan provinceId user.",
+      "Buat order dengan status 'pending' + reservedUntil + snapshot alamat user."
+    ],
+    "payment": [
+      "Backend buat invoice Xendit dari data order.",
+      "Simpan xenditInvoiceId di order.payment.",
+      "Status default 'pending'."
+    ],
+    "webhook": [
+      "Xendit callback → update order.payment.status jadi 'paid'.",
+      "Jika paid, jalankan Firestore Transaction untuk decrement stock variant.",
+      "Cloud Function otomatis update total product.stock.",
+      "Order.status berubah jadi 'processing'."
+    ],
+    "shipping": [
+      "Admin input tracking number + update logistics.status.",
+      "Status order → 'shipped', lalu 'completed' setelah delivered."
+    ],
+    "cartClear": [
+      "Setelah order sukses dibuat, kosongkan cart user."
+    ],
+    "vouchers": [
+      "Voucher bisa fixed atau percent discount.",
+      "Validasi minPurchase, validUntil, usageLimit.",
+      "Kurangi usedCount setiap kali voucher dipakai."
+    ],
+    "logistics": [
+      "Admin input province + price.",
+      "Digunakan untuk kalkulasi ongkos kirim saat checkout."
+    ],
+    "notifications": [
+      "User menerima notifikasi saat order update (paid, shipped, completed).",
+      "Simpan di collection /notifications/{userId}/items."
+    ],
+    "reporting": [
+      "Buat daily sales snapshot di /salesReports.",
+      "Simpan totalOrders, totalRevenue, topProducts.",
+      "Gunakan untuk dashboard admin."
+    ],
+    "scalability": [
+      "Mirror orders ke /userOrders/{userId}/orders agar query user lebih cepat.",
+      "Gunakan trigger Cloud Function untuk sync data antara /orders dan /userOrders."
+    ]
+  },
+  "flowSequence": {
+    "1_checkout": [
+      "User pilih produk + variant → add to cart.",
+      "Sebelum checkout, sistem cek apakah user punya alamat default.",
+      "Jika belum ada, user wajib input alamat lengkap + pilih provinsi.",
+      "Sistem hitung ongkir dari logistics.province + alamat user.",
+      "Order dibuat di /orders dengan status 'pending' + reservedUntil + snapshot alamat user."
+    ],
+    "2_payment": [
+      "Backend buat invoice Xendit.",
+      "xenditInvoiceId disimpan di order.payment.",
+      "User diarahkan ke halaman pembayaran."
+    ],
+    "3_webhook": [
+      "Xendit kirim callback ke backend.",
+      "Jika sukses, order.payment.status → 'paid', order.status → 'processing'.",
+      "Jalankan Firestore Transaction: kurangi stock variant, update product.stock."
+    ],
+    "4_fulfillment": [
+      "Admin input tracking number.",
+      "Order.status → 'shipped'.",
+      "Saat barang diterima, order.status → 'completed'."
+    ],
+    "5_postProcess": [
+      "Kosongkan cart user.",
+      "Kirim notifikasi ke user.",
+      "Tambahkan data ke /salesReports untuk analitik."
+    ]
+  }
+}
