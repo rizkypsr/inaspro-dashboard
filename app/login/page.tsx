@@ -1,35 +1,36 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardBody, CardHeader } from '@heroui/card';
-import { Input } from '@heroui/input';
-import { Button } from '@heroui/button';
-import { Alert } from '@heroui/alert';
-import { useAuth } from '@/lib/auth-context';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Input } from "@heroui/input";
+import { Button } from "@heroui/button";
+import { Alert } from "@heroui/alert";
+
+import { useAuth } from "@/lib/auth-context";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, error } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       await signIn(email, password);
-      router.push('/'); // Redirect to dashboard after successful login
+      router.push("/"); // Redirect to dashboard after successful login
     } catch (err) {
       // Error is handled by the auth context
-      console.error('Login failed:', err);
+      console.error("Login failed:", err);
     } finally {
       setIsLoading(false);
     }
@@ -48,59 +49,63 @@ export default function LoginPage() {
             </p>
           </div>
         </CardHeader>
-        
+
         <CardBody className="pt-0">
           {error && (
             <Alert
-              color="danger"
-              variant="flat"
               className="mb-4"
-              title="Login Failed"
+              color="danger"
               description={error}
+              title="Login Failed"
+              variant="flat"
             />
           )}
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <Input
-              type="email"
+              isRequired
+              classNames={{
+                input: "text-sm",
+                label: "text-sm font-medium",
+              }}
               label="Email"
               placeholder="Enter your email"
+              type="email"
               value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-              isRequired
               variant="bordered"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setEmail(e.target.value)
+              }
+            />
+
+            <Input
+              isRequired
               classNames={{
                 input: "text-sm",
                 label: "text-sm font-medium",
               }}
-            />
-            
-            <Input
-              type="password"
               label="Password"
               placeholder="Enter your password"
+              type="password"
               value={password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-              isRequired
               variant="bordered"
-              classNames={{
-                input: "text-sm",
-                label: "text-sm font-medium",
-              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
             />
-            
+
             <Button
-              type="submit"
-              color="primary"
-              size="lg"
               className="w-full font-medium"
-              isLoading={isLoading}
+              color="primary"
               isDisabled={!email || !password}
+              isLoading={isLoading}
+              size="lg"
+              type="submit"
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-          
+
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Only administrators can access this dashboard.

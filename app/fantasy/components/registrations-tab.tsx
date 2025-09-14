@@ -1,47 +1,43 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/table';
-import { Button } from '@heroui/button';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/modal';
-import { Input } from '@heroui/input';
-import { Select, SelectItem } from '@heroui/select';
-import { Chip } from '@heroui/chip';
-import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from '@/components/icons';
-import { registrationsService, Registration } from '@/lib/services/registrations-service';
-import { useParams } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@heroui/table";
+import { Button } from "@heroui/button";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from "@heroui/modal";
+import { Chip } from "@heroui/chip";
+import { useParams } from "next/navigation";
+
+import { EyeIcon } from "@/components/icons";
+import {
+  registrationsService,
+  Registration,
+} from "@/lib/services/registrations-service";
 
 // Registration interface is now imported from registrations-service
-
-interface FormData {
-  teamName: string;
-  userId: string;
-  teamId: string;
-  teamSize: number;
-  totalPaid: number;
-  paymentStatus: 'pending' | 'paid' | 'failed' | 'expired';
-  paymentId: string;
-}
-
 // Registrations data now loaded from Firestore
 
 export default function RegistrationsTab() {
   const params = useParams();
   const eventId = params.id as string;
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [selectedRegistration, setSelectedRegistration] =
+    useState<Registration | null>(null);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    teamName: '',
-    userId: '',
-    teamId: '',
-    teamSize: 0,
-    totalPaid: 0,
-    paymentStatus: 'pending',
-    paymentId: '',
-  });
 
   // Load registrations when component mounts
   useEffect(() => {
@@ -52,64 +48,38 @@ export default function RegistrationsTab() {
 
   const loadRegistrations = async () => {
     if (!eventId) return;
-    
+
     setLoading(true);
     try {
-      const registrationsData = await registrationsService.getRegistrationsByFantasyId(eventId);
+      const registrationsData =
+        await registrationsService.getRegistrationsByFantasyId(eventId);
+
       setRegistrations(registrationsData);
     } catch (error) {
-      console.error('Error loading registrations:', error);
+      console.error("Error loading registrations:", error);
     } finally {
       setLoading(false);
     }
   };
 
-
-
   const handleView = (registration: Registration) => {
     setSelectedRegistration(registration);
-    setIsEditing(false);
-    setFormData({
-      teamName: registration.teamName,
-      userId: registration.userId,
-      teamId: registration.teamId,
-      teamSize: registration.teamSize,
-      totalPaid: registration.totalPaid,
-      paymentStatus: registration.paymentStatus,
-      paymentId: registration.paymentId,
-    });
     onOpen();
   };
 
-
-
-
-
-
-
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
-      case 'paid':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'failed':
-        return 'danger';
-      case 'expired':
-        return 'secondary';
+      case "paid":
+        return "success";
+      case "pending":
+        return "warning";
+      case "failed":
+        return "danger";
+      case "expired":
+        return "secondary";
       default:
-        return 'default';
+        return "default";
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
   };
 
   if (!eventId) {
@@ -125,9 +95,10 @@ export default function RegistrationsTab() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Registrations</h2>
-          <p className="text-gray-600">{registrations.length} registrations received</p>
+          <p className="text-gray-600">
+            {registrations.length} registrations received
+          </p>
         </div>
-
       </div>
 
       <Table aria-label="Registrations table">
@@ -141,7 +112,9 @@ export default function RegistrationsTab() {
           <TableColumn>PAYMENT</TableColumn>
           <TableColumn>ACTIONS</TableColumn>
         </TableHeader>
-        <TableBody emptyContent={loading ? "Loading..." : "No registrations found"}>
+        <TableBody
+          emptyContent={loading ? "Loading..." : "No registrations found"}
+        >
           {registrations.map((registration) => (
             <TableRow key={registration.id}>
               <TableCell>{registration.teamName}</TableCell>
@@ -153,12 +126,20 @@ export default function RegistrationsTab() {
               </TableCell>
               <TableCell>{registration.teamSize}</TableCell>
               <TableCell>
-                {registration.registeredAt ? new Date(registration.registeredAt.seconds * 1000).toLocaleDateString() : '-'}
+                {registration.registeredAt
+                  ? new Date(
+                      registration.registeredAt.seconds * 1000,
+                    ).toLocaleDateString()
+                  : "-"}
               </TableCell>
               <TableCell>{registration.teamSize}</TableCell>
               <TableCell>
-                <Chip color={getPaymentStatusColor(registration.paymentStatus)} variant="flat">
-                  {registration.paymentStatus.charAt(0).toUpperCase() + registration.paymentStatus.slice(1)}
+                <Chip
+                  color={getPaymentStatusColor(registration.paymentStatus)}
+                  variant="flat"
+                >
+                  {registration.paymentStatus.charAt(0).toUpperCase() +
+                    registration.paymentStatus.slice(1)}
                 </Chip>
               </TableCell>
               <TableCell>
@@ -171,8 +152,6 @@ export default function RegistrationsTab() {
                   >
                     <EyeIcon />
                   </Button>
-
-
                 </div>
               </TableCell>
             </TableRow>
@@ -180,59 +159,111 @@ export default function RegistrationsTab() {
         </TableBody>
       </Table>
 
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+      <Modal isOpen={isOpen} size="2xl" onClose={onClose}>
         <ModalContent>
-          <ModalHeader>
-            Registration Details
-          </ModalHeader>
+          <ModalHeader>Registration Details</ModalHeader>
           <ModalBody>
             {selectedRegistration && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Team Name</label>
-                  <p className="text-sm text-gray-600">{selectedRegistration.teamName}</p>
+                  <span className="block text-sm font-medium mb-1">
+                    Team Name
+                  </span>
+                  <p className="text-sm text-gray-600">
+                    {selectedRegistration.teamName}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">User ID</label>
-                  <p className="text-sm text-gray-600">{selectedRegistration.userId}</p>
+                  <span className="block text-sm font-medium mb-1">
+                    User ID
+                  </span>
+                  <p className="text-sm text-gray-600">
+                    {selectedRegistration.userId}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Team ID</label>
-                  <p className="text-sm text-gray-600">{selectedRegistration.teamId}</p>
+                  <span className="block text-sm font-medium mb-1">
+                    Team ID
+                  </span>
+                  <p className="text-sm text-gray-600">
+                    {selectedRegistration.teamId}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Team Size</label>
-                  <p className="text-sm text-gray-600">{selectedRegistration.teamSize}</p>
+                  <span className="block text-sm font-medium mb-1">
+                    Team Size
+                  </span>
+                  <p className="text-sm text-gray-600">
+                    {selectedRegistration.teamSize}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Total Paid</label>
-                  <p className="text-sm text-gray-600">${selectedRegistration.totalPaid}</p>
+                  <span className="block text-sm font-medium mb-1">
+                    Total Paid
+                  </span>
+                  <p className="text-sm text-gray-600">
+                    ${selectedRegistration.totalPaid}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Payment Status</label>
-                  <Chip color={getPaymentStatusColor(selectedRegistration.paymentStatus)} variant="flat">
-                    {selectedRegistration.paymentStatus.charAt(0).toUpperCase() + selectedRegistration.paymentStatus.slice(1)}
+                  <span className="block text-sm font-medium mb-1">
+                    Payment Status
+                  </span>
+                  <Chip
+                    color={getPaymentStatusColor(
+                      selectedRegistration.paymentStatus,
+                    )}
+                    variant="flat"
+                  >
+                    {selectedRegistration.paymentStatus
+                      .charAt(0)
+                      .toUpperCase() +
+                      selectedRegistration.paymentStatus.slice(1)}
                   </Chip>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Payment ID</label>
-                  <p className="text-sm text-gray-600">{selectedRegistration.paymentId}</p>
+                  <span className="block text-sm font-medium mb-1">
+                    Payment ID
+                  </span>
+                  <p className="text-sm text-gray-600">
+                    {selectedRegistration.paymentId}
+                  </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Registration Date</label>
+                    <span className="block text-sm font-medium mb-1">
+                      Registration Date
+                    </span>
                     <p className="text-sm text-gray-600">
-                      {selectedRegistration.registeredAt ? new Date(selectedRegistration.registeredAt.seconds * 1000).toLocaleDateString() : '-'}
+                      {selectedRegistration.registeredAt
+                        ? new Date(
+                            selectedRegistration.registeredAt.seconds * 1000,
+                          ).toLocaleDateString()
+                        : "-"}
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Team Size</label>
-                    <p className="text-sm text-gray-600">{selectedRegistration.teamSize}</p>
+                    <span className="block text-sm font-medium mb-1">
+                      Team Size
+                    </span>
+                    <p className="text-sm text-gray-600">
+                      {selectedRegistration.teamSize}
+                    </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Payment Status</label>
-                    <Chip color={getPaymentStatusColor(selectedRegistration.paymentStatus)} variant="flat">
-                      {selectedRegistration.paymentStatus.charAt(0).toUpperCase() + selectedRegistration.paymentStatus.slice(1)}
+                    <span className="block text-sm font-medium mb-1">
+                      Payment Status
+                    </span>
+                    <Chip
+                      color={getPaymentStatusColor(
+                        selectedRegistration.paymentStatus,
+                      )}
+                      variant="flat"
+                    >
+                      {selectedRegistration.paymentStatus
+                        .charAt(0)
+                        .toUpperCase() +
+                        selectedRegistration.paymentStatus.slice(1)}
                     </Chip>
                   </div>
                 </div>
@@ -243,7 +274,6 @@ export default function RegistrationsTab() {
             <Button variant="light" onPress={onClose}>
               Close
             </Button>
-
           </ModalFooter>
         </ModalContent>
       </Modal>

@@ -5,36 +5,39 @@ import {
   NavbarContent,
   NavbarMenu,
   NavbarMenuToggle,
-  NavbarBrand,
   NavbarItem,
   NavbarMenuItem,
 } from "@heroui/navbar";
 import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
 import { Avatar } from "@heroui/avatar";
-import NextLink from "next/link";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { useAuth } from "@/lib/auth-context";
-import {
-  Logo
-} from "@/components/icons";
 
 interface NavbarProps {
   onMenuToggle?: () => void;
   showMenuButton?: boolean;
 }
 
-export const Navbar = ({ onMenuToggle, showMenuButton = false }: NavbarProps) => {
+export const Navbar = ({
+  onMenuToggle,
+  showMenuButton = false,
+}: NavbarProps) => {
   const { user, userData, logout, isAdmin } = useAuth();
 
   const handleLogout = async () => {
     try {
       await logout();
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
@@ -45,12 +48,22 @@ export const Navbar = ({ onMenuToggle, showMenuButton = false }: NavbarProps) =>
           <NavbarItem>
             <Button
               isIconOnly
+              className="lg:hidden"
               variant="light"
               onClick={onMenuToggle}
-              className="lg:hidden"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M4 6h16M4 12h16M4 18h16"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                />
               </svg>
             </Button>
           </NavbarItem>
@@ -66,7 +79,6 @@ export const Navbar = ({ onMenuToggle, showMenuButton = false }: NavbarProps) =>
         </NavbarItem>
         {user && isAdmin && (
           <>
-
             <NavbarItem>
               <Dropdown placement="bottom-end">
                 <DropdownTrigger>
@@ -74,7 +86,7 @@ export const Navbar = ({ onMenuToggle, showMenuButton = false }: NavbarProps) =>
                     as="button"
                     className="transition-transform"
                     color="primary"
-                    name={userData?.name || user.email || 'Admin'}
+                    name={userData?.name || user.email || "Admin"}
                     size="sm"
                     src={userData?.photoUrl}
                   />
@@ -82,11 +94,19 @@ export const Navbar = ({ onMenuToggle, showMenuButton = false }: NavbarProps) =>
                 <DropdownMenu aria-label="Profile Actions" variant="flat">
                   <DropdownItem key="profile" className="h-14 gap-2">
                     <p className="font-semibold">Signed in as</p>
-                    <p className="font-semibold">{userData?.email || user.email}</p>
+                    <p className="font-semibold">
+                      {userData?.email || user.email}
+                    </p>
                   </DropdownItem>
                   <DropdownItem key="settings">Settings</DropdownItem>
-                  <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
-                  <DropdownItem key="logout" color="danger" onClick={handleLogout}>
+                  <DropdownItem key="help_and_feedback">
+                    Help & Feedback
+                  </DropdownItem>
+                  <DropdownItem
+                    key="logout"
+                    color="danger"
+                    onClick={handleLogout}
+                  >
                     Log Out
                   </DropdownItem>
                 </DropdownMenu>
@@ -122,12 +142,7 @@ export const Navbar = ({ onMenuToggle, showMenuButton = false }: NavbarProps) =>
               </NavbarMenuItem>
             ))}
             <NavbarMenuItem>
-              <Link
-                color="danger"
-                href="#"
-                size="lg"
-                onClick={handleLogout}
-              >
+              <Link color="danger" href="#" size="lg" onClick={handleLogout}>
                 Log Out
               </Link>
             </NavbarMenuItem>

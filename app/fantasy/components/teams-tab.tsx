@@ -1,15 +1,34 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@heroui/button';
-import { Chip } from '@heroui/chip';
-import { Input } from '@heroui/input';
-import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@heroui/modal';
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/table';
-import { Textarea } from '@heroui/input';
-import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from '@/components/icons';
-import { teamsService, Team, CreateTeamData } from '@/lib/services/teams-service';
-import { useParams } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { Button } from "@heroui/button";
+import { Chip } from "@heroui/chip";
+import { Input } from "@heroui/input";
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  useDisclosure,
+} from "@heroui/modal";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+} from "@heroui/table";
+import { Textarea } from "@heroui/input";
+import { useParams } from "next/navigation";
+
+import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from "@/components/icons";
+import {
+  teamsService,
+  Team,
+  CreateTeamData,
+} from "@/lib/services/teams-service";
 
 // Team interface is now imported from teams-service
 
@@ -31,9 +50,9 @@ export default function TeamsTab() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    description: '',
-    size: '',
+    name: "",
+    description: "",
+    size: "",
     images: [],
   });
   const [uploadingImages, setUploadingImages] = useState<boolean>(false);
@@ -47,13 +66,14 @@ export default function TeamsTab() {
 
   const loadTeams = async () => {
     if (!eventId) return;
-    
+
     setLoading(true);
     try {
       const teamsData = await teamsService.getTeamsByFantasyId(eventId);
+
       setTeams(teamsData);
     } catch (error) {
-      console.error('Error loading teams:', error);
+      console.error("Error loading teams:", error);
     } finally {
       setLoading(false);
     }
@@ -63,9 +83,9 @@ export default function TeamsTab() {
     setSelectedTeam(null);
     setIsEditing(false);
     setFormData({
-      name: '',
-      description: '',
-      size: '',
+      name: "",
+      description: "",
+      size: "",
       images: [],
     });
     onOpen();
@@ -77,7 +97,7 @@ export default function TeamsTab() {
     setFormData({
       name: team.name,
       description: team.description,
-      size: team.size || '',
+      size: team.size || "",
       images: team.images || [],
     });
     onOpen();
@@ -89,7 +109,7 @@ export default function TeamsTab() {
     setFormData({
       name: team.name,
       description: team.description,
-      size: team.size || '',
+      size: team.size || "",
       images: team.images || [],
     });
     onOpen();
@@ -97,18 +117,20 @@ export default function TeamsTab() {
 
   const handleSave = async () => {
     if (!eventId) return;
-    
+
     // Validate required fields
     if (!formData.name.trim()) {
-      console.error('Team name is required');
+      console.error("Team name is required");
+
       return;
     }
-    
+
     if (!formData.description.trim()) {
-      console.error('Team description is required');
+      console.error("Team description is required");
+
       return;
     }
-    
+
     try {
       if (isEditing && selectedTeam?.id) {
         const updateData = {
@@ -116,53 +138,57 @@ export default function TeamsTab() {
           name: formData.name.trim(),
           description: formData.description.trim(),
           size: formData.size,
-          images: formData.images || []
+          images: formData.images || [],
         };
+
         await teamsService.updateTeam(selectedTeam.id, updateData);
       } else {
         const createData: CreateTeamData = {
-           name: formData.name.trim(),
-           description: formData.description.trim(),
-           images: formData.images || [],
-           size: formData.size,
-           fantasyId: eventId,
-         };
+          name: formData.name.trim(),
+          description: formData.description.trim(),
+          images: formData.images || [],
+          size: formData.size,
+          fantasyId: eventId,
+        };
+
         await teamsService.createTeam(createData);
       }
       await loadTeams();
       onClose();
     } catch (error) {
-      console.error('Error saving team:', error);
+      console.error("Error saving team:", error);
     }
   };
 
   const handleFileUpload = async (files: FileList) => {
     if (!files || files.length === 0) return;
-    
+
     setUploadingImages(true);
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
         const fileName = `teams/${eventId}/${Date.now()}_${file.name}`;
         const uploadResult = await uploadToFirebaseStorage(fileName, file);
+
         return uploadResult.downloadURL;
       });
-      
+
       const uploadedUrls = await Promise.all(uploadPromises);
-      setFormData(prev => ({
+
+      setFormData((prev) => ({
         ...prev,
-        images: [...prev.images, ...uploadedUrls]
+        images: [...prev.images, ...uploadedUrls],
       }));
     } catch (error) {
-      console.error('Error uploading images:', error);
+      console.error("Error uploading images:", error);
     } finally {
       setUploadingImages(false);
     }
   };
 
   const handleRemoveImage = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      images: prev.images.filter((_, i) => i !== index),
     }));
   };
 
@@ -171,16 +197,17 @@ export default function TeamsTab() {
       // Convert file to base64 for Firebase Storage upload
       const fileContent = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
+
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
 
       // Upload to Firebase Storage using MCP
-      const response = await fetch('/api/firebase/storage/upload', {
-        method: 'POST',
+      const response = await fetch("/api/firebase/storage/upload", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           fileName: filePath,
@@ -190,25 +217,26 @@ export default function TeamsTab() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to upload image');
+        throw new Error("Failed to upload image");
       }
 
       const result = await response.json();
+
       return { downloadURL: result.downloadUrl };
     } catch (error) {
-      console.error('Error uploading to Firebase Storage:', error);
+      console.error("Error uploading to Firebase Storage:", error);
       throw error;
     }
   };
 
   const handleDelete = async (teamId: string | undefined) => {
     if (!teamId) return;
-    
+
     try {
       await teamsService.deleteTeam(teamId);
       await loadTeams();
     } catch (error) {
-      console.error('Error deleting team:', error);
+      console.error("Error deleting team:", error);
     }
   };
 
@@ -227,7 +255,7 @@ export default function TeamsTab() {
           <h2 className="text-2xl font-bold">Teams</h2>
           <p className="text-gray-600">{teams.length} teams registered</p>
         </div>
-        <Button color="primary" onPress={handleAdd} startContent={<PlusIcon />}>
+        <Button color="primary" startContent={<PlusIcon />} onPress={handleAdd}>
           Add Team
         </Button>
       </div>
@@ -247,14 +275,16 @@ export default function TeamsTab() {
               <TableCell>{team.description}</TableCell>
               <TableCell>
                 {team.size ? (
-                  <Chip color="primary" variant="flat" size="sm">
+                  <Chip color="primary" size="sm" variant="flat">
                     {team.size}
                   </Chip>
                 ) : (
                   <span className="text-gray-400">No size</span>
                 )}
               </TableCell>
-              <TableCell>{team.createdAt?.toDate().toLocaleDateString()}</TableCell>
+              <TableCell>
+                {team.createdAt?.toDate().toLocaleDateString()}
+              </TableCell>
               <TableCell>
                 <div className="flex gap-2">
                   <Button
@@ -275,9 +305,9 @@ export default function TeamsTab() {
                   </Button>
                   <Button
                     isIconOnly
+                    color="danger"
                     size="sm"
                     variant="light"
-                    color="danger"
                     onPress={() => handleDelete(team.id)}
                   >
                     <TrashIcon />
@@ -289,93 +319,107 @@ export default function TeamsTab() {
         </TableBody>
       </Table>
 
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+      <Modal isOpen={isOpen} size="2xl" onClose={onClose}>
         <ModalContent>
           <ModalHeader>
-            {isEditing ? 'Edit Team' : selectedTeam ? 'Team Details' : 'Add New Team'}
+            {isEditing
+              ? "Edit Team"
+              : selectedTeam
+                ? "Team Details"
+                : "Add New Team"}
           </ModalHeader>
           <ModalBody>
             <div className="space-y-4">
               <Input
+                isReadOnly={!!(selectedTeam && !isEditing)}
                 label="Team Name"
                 value={formData.name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                isReadOnly={!!(selectedTeam && !isEditing)}
               />
               <Textarea
+                isReadOnly={!!(selectedTeam && !isEditing)}
                 label="Description"
                 value={formData.description}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                isReadOnly={!!(selectedTeam && !isEditing)}
               />
               <div className="space-y-2">
-                <label className="text-sm font-medium">Available Sizes</label>
+                <label className="text-sm font-medium" htmlFor="size">
+                  Available Sizes
+                </label>
                 <div className="flex flex-wrap gap-2">
-                  {['S', 'M', 'L', 'XL', 'XXL', 'XXXL'].map((size) => (
+                  {["S", "M", "L", "XL", "XXL", "XXXL"].map((size) => (
                     <Button
                       key={size}
+                      color={formData.size === size ? "primary" : "default"}
+                      isDisabled={!!(selectedTeam && !isEditing)}
                       size="sm"
                       variant={formData.size === size ? "solid" : "bordered"}
-                      color={formData.size === size ? "primary" : "default"}
                       onPress={() => {
                         if (selectedTeam && !isEditing) return;
-                        const newSize = formData.size === size ? '' : size;
+                        const newSize = formData.size === size ? "" : size;
+
                         setFormData({ ...formData, size: newSize });
                       }}
-                      isDisabled={!!(selectedTeam && !isEditing)}
                     >
                       {size}
                     </Button>
                   ))}
                 </div>
               </div>
-              
+
               {/* Images Section */}
               <div className="space-y-3">
-                <label className="text-sm font-medium">Images</label>
-                
+                <label className="text-sm font-medium" htmlFor="images">
+                  Images
+                </label>
+
                 {/* Add new image */}
                 {(isEditing || !selectedTeam) && (
                   <div className="space-y-2">
                     <input
-                      type="file"
-                      accept="image/*"
                       multiple
-                      onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                      accept="image/*"
                       className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                       disabled={uploadingImages}
+                      type="file"
+                      onChange={(e) =>
+                        e.target.files && handleFileUpload(e.target.files)
+                      }
                     />
                     {uploadingImages && (
-                      <p className="text-sm text-blue-600">Uploading images...</p>
+                      <p className="text-sm text-blue-600">
+                        Uploading images...
+                      </p>
                     )}
                   </div>
                 )}
-                
+
                 {/* Display existing images */}
                 {formData.images.length > 0 && (
                   <div className="grid grid-cols-2 gap-3">
                     {formData.images.map((imageUrl, index) => (
                       <div key={index} className="relative group">
                         <img
-                          src={imageUrl}
-                          alt={`Team image ${index + 1}`}
+                          alt={`Team`}
                           className="w-full h-24 object-cover rounded-lg border"
+                          src={imageUrl}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = '/placeholder-image.png';
+
+                            target.src = "/placeholder-image.png";
                           }}
                         />
                         {(isEditing || !selectedTeam) && (
                           <Button
                             isIconOnly
-                            color="danger"
-                            variant="flat"
-                            size="sm"
                             className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            color="danger"
+                            size="sm"
+                            variant="flat"
                             onPress={() => handleRemoveImage(index)}
                           >
                             ×
@@ -385,7 +429,7 @@ export default function TeamsTab() {
                     ))}
                   </div>
                 )}
-                
+
                 {formData.images.length === 0 && (
                   <p className="text-gray-500 text-sm">No images added yet</p>
                 )}
@@ -394,11 +438,11 @@ export default function TeamsTab() {
           </ModalBody>
           <ModalFooter>
             <Button variant="light" onPress={onClose}>
-              {selectedTeam && !isEditing ? 'Close' : 'Cancel'}
+              {selectedTeam && !isEditing ? "Close" : "Cancel"}
             </Button>
             {(!selectedTeam || isEditing) && (
               <Button color="primary" onPress={handleSave}>
-                {isEditing ? 'Update' : 'Add'} Team
+                {isEditing ? "Update" : "Add"} Team
               </Button>
             )}
           </ModalFooter>

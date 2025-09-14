@@ -304,5 +304,5 @@ export const TrashIcon = (props: IconSvgProps) => (
       strokeLinejoin="round"
       strokeWidth="2"
     />
-   </svg>
+  </svg>
 );

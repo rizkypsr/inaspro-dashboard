@@ -1,19 +1,20 @@
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  getDocs, 
-  getDoc, 
-  query, 
-  orderBy, 
-  where, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  getDoc,
+  query,
+  orderBy,
+  where,
   Timestamp,
   DocumentData,
-  QuerySnapshot
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+  QuerySnapshot,
+} from "firebase/firestore";
+
+import { db } from "@/lib/firebase";
 
 export interface Fantasy {
   id?: string;
@@ -40,22 +41,26 @@ export interface CreateFantasyData {
 }
 
 class FantasyService {
-  private collectionName = 'fantasies';
+  private collectionName = "fantasies";
 
   // Create a new fantasy
   async createFantasy(data: CreateFantasyData): Promise<string> {
     try {
-      const fantasyData: Omit<Fantasy, 'id'> = {
+      const fantasyData: Omit<Fantasy, "id"> = {
         ...data,
         schedule: Timestamp.fromDate(data.schedule),
-        createdAt: Timestamp.now()
+        createdAt: Timestamp.now(),
       };
-      
-      const docRef = await addDoc(collection(db, this.collectionName), fantasyData);
+
+      const docRef = await addDoc(
+        collection(db, this.collectionName),
+        fantasyData,
+      );
+
       return docRef.id;
     } catch (error) {
-      console.error('Error creating fantasy:', error);
-      throw new Error('Failed to create fantasy');
+      console.error("Error creating fantasy:", error);
+      throw new Error("Failed to create fantasy");
     }
   }
 
@@ -64,23 +69,23 @@ class FantasyService {
     try {
       const q = query(
         collection(db, this.collectionName),
-        orderBy('createdAt', 'desc')
+        orderBy("createdAt", "desc"),
       );
-      
+
       const querySnapshot: QuerySnapshot<DocumentData> = await getDocs(q);
       const fantasies: Fantasy[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         fantasies.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Fantasy);
       });
-      
+
       return fantasies;
     } catch (error) {
-      console.error('Error getting fantasies:', error);
-      throw new Error('Failed to fetch fantasies');
+      console.error("Error getting fantasies:", error);
+      throw new Error("Failed to fetch fantasies");
     }
   }
 
@@ -89,36 +94,39 @@ class FantasyService {
     try {
       const docRef = doc(db, this.collectionName, fantasyId);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         return {
           id: docSnap.id,
-          ...docSnap.data()
+          ...docSnap.data(),
         } as Fantasy;
       } else {
         return null;
       }
     } catch (error) {
-      console.error('Error getting fantasy:', error);
-      throw new Error('Failed to fetch fantasy');
+      console.error("Error getting fantasy:", error);
+      throw new Error("Failed to fetch fantasy");
     }
   }
 
   // Update fantasy
-  async updateFantasy(fantasyId: string, data: Partial<CreateFantasyData>): Promise<void> {
+  async updateFantasy(
+    fantasyId: string,
+    data: Partial<CreateFantasyData>,
+  ): Promise<void> {
     try {
       const docRef = doc(db, this.collectionName, fantasyId);
       const { schedule, ...restData } = data;
       const updateData: any = { ...restData };
-      
+
       if (schedule) {
         updateData.schedule = Timestamp.fromDate(schedule);
       }
-      
+
       await updateDoc(docRef, updateData);
     } catch (error) {
-      console.error('Error updating fantasy:', error);
-      throw new Error('Failed to update fantasy');
+      console.error("Error updating fantasy:", error);
+      throw new Error("Failed to update fantasy");
     }
   }
 
@@ -126,10 +134,11 @@ class FantasyService {
   async deleteFantasy(fantasyId: string): Promise<void> {
     try {
       const docRef = doc(db, this.collectionName, fantasyId);
+
       await deleteDoc(docRef);
     } catch (error) {
-      console.error('Error deleting fantasy:', error);
-      throw new Error('Failed to delete fantasy');
+      console.error("Error deleting fantasy:", error);
+      throw new Error("Failed to delete fantasy");
     }
   }
 
@@ -138,24 +147,24 @@ class FantasyService {
     try {
       const q = query(
         collection(db, this.collectionName),
-        where('createdBy', '==', createdBy),
-        orderBy('createdAt', 'desc')
+        where("createdBy", "==", createdBy),
+        orderBy("createdAt", "desc"),
       );
-      
+
       const querySnapshot = await getDocs(q);
       const fantasies: Fantasy[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         fantasies.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Fantasy);
       });
-      
+
       return fantasies;
     } catch (error) {
-      console.error('Error getting fantasies by creator:', error);
-      throw new Error('Failed to fetch fantasies by creator');
+      console.error("Error getting fantasies by creator:", error);
+      throw new Error("Failed to fetch fantasies by creator");
     }
   }
 
@@ -165,24 +174,24 @@ class FantasyService {
       const now = Timestamp.now();
       const q = query(
         collection(db, this.collectionName),
-        where('schedule', '>', now),
-        orderBy('schedule', 'asc')
+        where("schedule", ">", now),
+        orderBy("schedule", "asc"),
       );
-      
+
       const querySnapshot = await getDocs(q);
       const fantasies: Fantasy[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         fantasies.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Fantasy);
       });
-      
+
       return fantasies;
     } catch (error) {
-      console.error('Error getting upcoming fantasies:', error);
-      throw new Error('Failed to fetch upcoming fantasies');
+      console.error("Error getting upcoming fantasies:", error);
+      throw new Error("Failed to fetch upcoming fantasies");
     }
   }
 }

@@ -1,31 +1,39 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableHeader,
   TableColumn,
   TableBody,
   TableRow,
-  TableCell
-} from '@heroui/table';
-import { Button } from '@heroui/button';
+  TableCell,
+} from "@heroui/table";
+import { Button } from "@heroui/button";
 import {
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
-  useDisclosure
-} from '@heroui/modal';
-import { Input } from '@heroui/input';
-import { Chip } from '@heroui/chip';
-import { Tooltip } from '@heroui/tooltip';
-import { Spinner } from '@heroui/spinner';
-import { PlusIcon, PencilIcon, TrashIcon } from '@/components/icons';
-import { TvCategory, CreateTvCategoryData, UpdateTvCategoryData, TvContent, CreateTvContentData } from '../../../types/tv';
-import { TvCategoriesService } from '../../../lib/services/tv-categories-service';
-import { TvContentsService } from '../../../lib/services/tv-contents-service';
+  useDisclosure,
+} from "@heroui/modal";
+import { Input } from "@heroui/input";
+import { Chip } from "@heroui/chip";
+import { Tooltip } from "@heroui/tooltip";
+import { Spinner } from "@heroui/spinner";
+
+import {
+  TvCategory,
+  CreateTvCategoryData,
+  UpdateTvCategoryData,
+  TvContent,
+  CreateTvContentData,
+} from "../../../types/tv";
+import { TvCategoriesService } from "../../../lib/services/tv-categories-service";
+import { TvContentsService } from "../../../lib/services/tv-contents-service";
+
+import { PlusIcon, PencilIcon, TrashIcon } from "@/components/icons";
 
 interface FormData {
   title: string;
@@ -42,29 +50,38 @@ interface ContentFormData {
 export default function TvCategoriesTab() {
   const [categories, setCategories] = useState<TvCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<TvCategory | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<TvCategory | null>(
+    null,
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    title: '',
-    order: 1
+    title: "",
+    order: 1,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contents, setContents] = useState<TvContent[]>([]);
-  const [selectedCategoryForContents, setSelectedCategoryForContents] = useState<TvCategory | null>(null);
+  const [selectedCategoryForContents, setSelectedCategoryForContents] =
+    useState<TvCategory | null>(null);
   const [contentFormData, setContentFormData] = useState<ContentFormData>({
-    title: '',
-    image: '',
-    link: '',
-    imageFile: null
+    title: "",
+    image: "",
+    link: "",
+    imageFile: null,
   });
-  const [selectedContent, setSelectedContent] = useState<TvContent | null>(null);
+  const [selectedContent, setSelectedContent] = useState<TvContent | null>(
+    null,
+  );
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [isSubmittingContent, setIsSubmittingContent] = useState(false);
   const [loadingContents, setLoadingContents] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  
+
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isOpen: isContentModalOpen, onOpen: onContentModalOpen, onClose: onContentModalClose } = useDisclosure();
+  const {
+    isOpen: isContentModalOpen,
+    onOpen: onContentModalOpen,
+    onClose: onContentModalClose,
+  } = useDisclosure();
 
   useEffect(() => {
     fetchCategories();
@@ -74,9 +91,10 @@ export default function TvCategoriesTab() {
     try {
       setLoading(true);
       const data = await TvCategoriesService.getCategories();
+
       setCategories(data);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
     } finally {
       setLoading(false);
     }
@@ -84,9 +102,10 @@ export default function TvCategoriesTab() {
 
   const handleAdd = async () => {
     const nextOrder = await TvCategoriesService.getNextOrder();
+
     setFormData({
-      title: '',
-      order: nextOrder
+      title: "",
+      order: nextOrder,
     });
     setSelectedCategory(null);
     setIsEditing(false);
@@ -96,7 +115,7 @@ export default function TvCategoriesTab() {
   const handleEdit = (category: TvCategory) => {
     setFormData({
       title: category.title,
-      order: category.order
+      order: category.order,
     });
     setSelectedCategory(category);
     setIsEditing(true);
@@ -112,43 +131,50 @@ export default function TvCategoriesTab() {
       await TvCategoriesService.deleteCategory(category.id);
       fetchCategories();
     } catch (error) {
-      console.error('Error deleting category:', error);
+      console.error("Error deleting category:", error);
     }
   };
 
   const handleSubmit = async () => {
     if (!formData.title.trim()) {
-      alert('Title is required');
+      alert("Title is required");
+
       return;
     }
 
     if (formData.order < 1) {
-      alert('Order must be at least 1');
+      alert("Order must be at least 1");
+
       return;
     }
 
     try {
       setIsSubmitting(true);
-      
+
       if (isEditing && selectedCategory) {
         const updateData: UpdateTvCategoryData = {
           title: formData.title,
-          order: formData.order
+          order: formData.order,
         };
-        await TvCategoriesService.updateCategory(selectedCategory.id, updateData);
+
+        await TvCategoriesService.updateCategory(
+          selectedCategory.id,
+          updateData,
+        );
       } else {
         const createData: CreateTvCategoryData = {
           title: formData.title,
-          order: formData.order
+          order: formData.order,
         };
+
         await TvCategoriesService.createCategory(createData);
       }
-      
+
       onClose();
       fetchCategories();
     } catch (error) {
-      console.error('Error saving category:', error);
-      alert('Failed to save category');
+      console.error("Error saving category:", error);
+      alert("Failed to save category");
     } finally {
       setIsSubmitting(false);
     }
@@ -156,7 +182,7 @@ export default function TvCategoriesTab() {
 
   const handleModalClose = () => {
     onClose();
-    setFormData({ title: '', order: 1 });
+    setFormData({ title: "", order: 1 });
     setSelectedCategory(null);
     setIsEditing(false);
   };
@@ -166,9 +192,10 @@ export default function TvCategoriesTab() {
     setLoadingContents(true);
     try {
       const categoryContents = await TvContentsService.getContents(category.id);
+
       setContents(categoryContents);
     } catch (error) {
-      console.error('Error fetching contents:', error);
+      console.error("Error fetching contents:", error);
       setContents([]);
     } finally {
       setLoadingContents(false);
@@ -178,10 +205,10 @@ export default function TvCategoriesTab() {
 
   const handleAddContent = () => {
     setContentFormData({
-      title: '',
-      image: '',
-      link: '',
-      imageFile: null
+      title: "",
+      image: "",
+      link: "",
+      imageFile: null,
     });
     setSelectedContent(null);
     setIsEditingContent(false);
@@ -189,11 +216,11 @@ export default function TvCategoriesTab() {
 
   const handleEditContent = (content: TvContent) => {
     setContentFormData({
-        title: content.title,
-        image: content.image,
-        link: content.link,
-        imageFile: null
-      });
+      title: content.title,
+      image: content.image,
+      link: content.link,
+      imageFile: null,
+    });
     setSelectedContent(content);
     setIsEditingContent(true);
   };
@@ -206,12 +233,18 @@ export default function TvCategoriesTab() {
     if (!selectedCategoryForContents) return;
 
     try {
-      await TvContentsService.deleteContent(selectedCategoryForContents.id, content.id);
-      const updatedContents = await TvContentsService.getContents(selectedCategoryForContents.id);
+      await TvContentsService.deleteContent(
+        selectedCategoryForContents.id,
+        content.id,
+      );
+      const updatedContents = await TvContentsService.getContents(
+        selectedCategoryForContents.id,
+      );
+
       setContents(updatedContents);
     } catch (error) {
-      console.error('Error deleting content:', error);
-      alert('Failed to delete content');
+      console.error("Error deleting content:", error);
+      alert("Failed to delete content");
     }
   };
 
@@ -220,23 +253,24 @@ export default function TvCategoriesTab() {
     try {
       // Upload to Firebase Storage using MCP
       const fileName = `tv-contents/${Date.now()}-${file.name}`;
-      const result = await fetch('/api/upload-image', {
-        method: 'POST',
+      const result = await fetch("/api/upload-image", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           fileName,
           fileContent: await fileToBase64(file),
-          contentType: file.type
-        })
+          contentType: file.type,
+        }),
       });
-      
+
       if (!result.ok) {
-        throw new Error('Failed to upload image');
+        throw new Error("Failed to upload image");
       }
-      
+
       const { downloadURL } = await result.json();
+
       return downloadURL;
     } finally {
       setUploadingImage(false);
@@ -246,15 +280,17 @@ export default function TvCategoriesTab() {
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
+
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
+      reader.onerror = (error) => reject(error);
     });
   };
 
   const handleSubmitContent = async () => {
     if (!contentFormData.title.trim()) {
-      alert('Title is required');
+      alert("Title is required");
+
       return;
     }
 
@@ -262,41 +298,48 @@ export default function TvCategoriesTab() {
 
     try {
       setIsSubmittingContent(true);
-      
+
       let imageUrl = contentFormData.image;
-      
+
       // Upload new image if file is selected
       if (contentFormData.imageFile) {
         imageUrl = await handleImageUpload(contentFormData.imageFile);
       }
-      
+
       const contentData = {
         title: contentFormData.title,
         image: imageUrl,
-        link: contentFormData.link
+        link: contentFormData.link,
       };
-      
+
       if (isEditingContent && selectedContent) {
         await TvContentsService.updateContent(
           selectedCategoryForContents.id,
           selectedContent.id,
-          contentData
+          contentData,
         );
       } else {
         const createData: CreateTvContentData = {
-          ...contentData
+          ...contentData,
         };
-        await TvContentsService.createContent(selectedCategoryForContents.id, createData);
+
+        await TvContentsService.createContent(
+          selectedCategoryForContents.id,
+          createData,
+        );
       }
-      
-      const updatedContents = await TvContentsService.getContents(selectedCategoryForContents.id);
+
+      const updatedContents = await TvContentsService.getContents(
+        selectedCategoryForContents.id,
+      );
+
       setContents(updatedContents);
-      setContentFormData({ title: '', image: '', link: '', imageFile: null });
+      setContentFormData({ title: "", image: "", link: "", imageFile: null });
       setSelectedContent(null);
       setIsEditingContent(false);
     } catch (error) {
-      console.error('Error saving content:', error);
-      alert('Failed to save content');
+      console.error("Error saving content:", error);
+      alert("Failed to save content");
     } finally {
       setIsSubmittingContent(false);
     }
@@ -304,7 +347,7 @@ export default function TvCategoriesTab() {
 
   const handleContentModalClose = () => {
     onContentModalClose();
-    setContentFormData({ title: '', image: '', link: '', imageFile: null });
+    setContentFormData({ title: "", image: "", link: "", imageFile: null });
     setSelectedContent(null);
     setIsEditingContent(false);
     setSelectedCategoryForContents(null);
@@ -312,12 +355,12 @@ export default function TvCategoriesTab() {
   };
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
@@ -356,7 +399,7 @@ export default function TvCategoriesTab() {
                 <div className="font-medium">{category.title}</div>
               </TableCell>
               <TableCell>
-                <Chip size="sm" variant="flat" color="primary">
+                <Chip color="primary" size="sm" variant="flat">
                   {category.order}
                 </Chip>
               </TableCell>
@@ -369,9 +412,9 @@ export default function TvCategoriesTab() {
                 <div className="flex gap-2">
                   <Tooltip content="Manage contents">
                     <Button
+                      color="secondary"
                       size="sm"
                       variant="flat"
-                      color="secondary"
                       onPress={() => handleManageContents(category)}
                     >
                       Contents
@@ -387,12 +430,12 @@ export default function TvCategoriesTab() {
                       <PencilIcon className="h-4 w-4" />
                     </Button>
                   </Tooltip>
-                  <Tooltip content="Delete category" color="danger">
+                  <Tooltip color="danger" content="Delete category">
                     <Button
                       isIconOnly
+                      color="danger"
                       size="sm"
                       variant="light"
-                      color="danger"
                       onPress={() => handleDelete(category)}
                     >
                       <TrashIcon className="h-4 w-4" />
@@ -405,28 +448,35 @@ export default function TvCategoriesTab() {
         </TableBody>
       </Table>
 
-      <Modal isOpen={isOpen} onClose={handleModalClose} size="md">
+      <Modal isOpen={isOpen} size="md" onClose={handleModalClose}>
         <ModalContent>
           <ModalHeader>
-            {isEditing ? 'Edit Category' : 'Add New Category'}
+            {isEditing ? "Edit Category" : "Add New Category"}
           </ModalHeader>
           <ModalBody>
             <div className="space-y-4">
               <Input
+                isRequired
                 label="Title"
                 placeholder="Enter category title"
                 value={formData.title}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
-                isRequired
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
               />
               <Input
-                label="Order"
-                type="number"
-                placeholder="Enter display order"
-                value={formData.order.toString()}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, order: parseInt(e.target.value) || 1 })}
-                min={1}
                 isRequired
+                label="Order"
+                min={1}
+                placeholder="Enter display order"
+                type="number"
+                value={formData.order.toString()}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFormData({
+                    ...formData,
+                    order: parseInt(e.target.value) || 1,
+                  })
+                }
               />
             </div>
           </ModalBody>
@@ -436,17 +486,21 @@ export default function TvCategoriesTab() {
             </Button>
             <Button
               color="primary"
-              onPress={handleSubmit}
               isLoading={isSubmitting}
+              onPress={handleSubmit}
             >
-              {isEditing ? 'Update' : 'Create'}
+              {isEditing ? "Update" : "Create"}
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
 
       {/* Content Management Modal */}
-      <Modal isOpen={isContentModalOpen} onClose={handleContentModalClose} size="4xl">
+      <Modal
+        isOpen={isContentModalOpen}
+        size="4xl"
+        onClose={handleContentModalClose}
+      >
         <ModalContent>
           <ModalHeader>
             Manage Contents - {selectedCategoryForContents?.title}
@@ -456,24 +510,30 @@ export default function TvCategoriesTab() {
               {/* Add Content Form */}
               <div className="border-b pb-4">
                 <h3 className="text-lg font-semibold mb-4">
-                  {isEditingContent ? 'Edit Content' : 'Add New Content'}
+                  {isEditingContent ? "Edit Content" : "Add New Content"}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
+                    isRequired
                     label="Title"
                     placeholder="Enter content title"
                     value={contentFormData.title}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                      setContentFormData({ ...contentFormData, title: e.target.value })
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setContentFormData({
+                        ...contentFormData,
+                        title: e.target.value,
+                      })
                     }
-                    isRequired
                   />
                   <Input
                     label="Link URL"
                     placeholder="Enter link URL"
                     value={contentFormData.link}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                      setContentFormData({ ...contentFormData, link: e.target.value })
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setContentFormData({
+                        ...contentFormData,
+                        link: e.target.value,
+                      })
                     }
                   />
                 </div>
@@ -482,25 +542,40 @@ export default function TvCategoriesTab() {
                     label="Image URL"
                     placeholder="Enter image URL or upload file"
                     value={contentFormData.image}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                      setContentFormData({ ...contentFormData, image: e.target.value })
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setContentFormData({
+                        ...contentFormData,
+                        image: e.target.value,
+                      })
                     }
                   />
                   <div>
-                    <label className="block text-sm font-medium mb-2">Upload Image File</label>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      htmlFor="content-image"
+                      id="content-image"
+                    >
+                      Upload Image File
+                    </label>
                     <input
-                      type="file"
                       accept="image/*"
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      type="file"
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         const file = e.target.files?.[0] || null;
-                        setContentFormData({ ...contentFormData, imageFile: file });
+
+                        setContentFormData({
+                          ...contentFormData,
+                          imageFile: file,
+                        });
                       }}
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
                     {uploadingImage && (
                       <div className="flex items-center gap-2 mt-2">
                         <Spinner size="sm" />
-                        <span className="text-sm text-gray-500">Uploading image...</span>
+                        <span className="text-sm text-gray-500">
+                          Uploading image...
+                        </span>
                       </div>
                     )}
                   </div>
@@ -508,16 +583,13 @@ export default function TvCategoriesTab() {
                 <div className="flex gap-2 mt-4">
                   <Button
                     color="primary"
-                    onPress={handleSubmitContent}
                     isLoading={isSubmittingContent}
+                    onPress={handleSubmitContent}
                   >
-                    {isEditingContent ? 'Update Content' : 'Add Content'}
+                    {isEditingContent ? "Update Content" : "Add Content"}
                   </Button>
                   {isEditingContent && (
-                    <Button
-                      variant="light"
-                      onPress={handleAddContent}
-                    >
+                    <Button variant="light" onPress={handleAddContent}>
                       Cancel Edit
                     </Button>
                   )}
@@ -548,10 +620,10 @@ export default function TvCategoriesTab() {
                           </TableCell>
                           <TableCell>
                             {content.image ? (
-                              <img 
-                                src={content.image} 
+                              <img
                                 alt={content.title}
                                 className="w-12 h-12 object-cover rounded"
+                                src={content.image}
                               />
                             ) : (
                               <span className="text-gray-400">No image</span>
@@ -559,11 +631,11 @@ export default function TvCategoriesTab() {
                           </TableCell>
                           <TableCell>
                             {content.link ? (
-                              <a 
-                                href={content.link} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
+                              <a
                                 className="text-blue-500 hover:underline"
+                                href={content.link}
+                                rel="noopener noreferrer"
+                                target="_blank"
                               >
                                 View Link
                               </a>
@@ -588,12 +660,12 @@ export default function TvCategoriesTab() {
                                   <PencilIcon className="h-4 w-4" />
                                 </Button>
                               </Tooltip>
-                              <Tooltip content="Delete content" color="danger">
+                              <Tooltip color="danger" content="Delete content">
                                 <Button
                                   isIconOnly
+                                  color="danger"
                                   size="sm"
                                   variant="light"
-                                  color="danger"
                                   onPress={() => handleDeleteContent(content)}
                                 >
                                   <TrashIcon className="h-4 w-4" />

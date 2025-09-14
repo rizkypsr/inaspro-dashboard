@@ -1,19 +1,20 @@
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  getDocs, 
-  getDoc, 
-  query, 
-  orderBy, 
-  where, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  getDoc,
+  query,
+  orderBy,
+  where,
   Timestamp,
   DocumentData,
-  QuerySnapshot
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+  QuerySnapshot,
+} from "firebase/firestore";
+
+import { db } from "@/lib/firebase";
 
 export interface Shoe {
   id?: string;
@@ -37,21 +38,25 @@ export interface CreateShoeData {
 }
 
 class ShoesService {
-  private collectionName = 'shoes';
+  private collectionName = "shoes";
 
   // Create a new shoe
   async createShoe(data: CreateShoeData): Promise<string> {
     try {
-      const shoeData: Omit<Shoe, 'id'> = {
+      const shoeData: Omit<Shoe, "id"> = {
         ...data,
-        createdAt: Timestamp.now()
+        createdAt: Timestamp.now(),
       };
-      
-      const docRef = await addDoc(collection(db, this.collectionName), shoeData);
+
+      const docRef = await addDoc(
+        collection(db, this.collectionName),
+        shoeData,
+      );
+
       return docRef.id;
     } catch (error) {
-      console.error('Error creating shoe:', error);
-      throw new Error('Failed to create shoe');
+      console.error("Error creating shoe:", error);
+      throw new Error("Failed to create shoe");
     }
   }
 
@@ -60,23 +65,23 @@ class ShoesService {
     try {
       const q = query(
         collection(db, this.collectionName),
-        orderBy('createdAt', 'desc')
+        orderBy("createdAt", "desc"),
       );
-      
+
       const querySnapshot: QuerySnapshot<DocumentData> = await getDocs(q);
       const shoes: Shoe[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         shoes.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Shoe);
       });
-      
+
       return shoes;
     } catch (error) {
-      console.error('Error getting shoes:', error);
-      throw new Error('Failed to fetch shoes');
+      console.error("Error getting shoes:", error);
+      throw new Error("Failed to fetch shoes");
     }
   }
 
@@ -85,24 +90,24 @@ class ShoesService {
     try {
       const q = query(
         collection(db, this.collectionName),
-        where('fantasyId', '==', fantasyId),
-        orderBy('createdAt', 'desc')
+        where("fantasyId", "==", fantasyId),
+        orderBy("createdAt", "desc"),
       );
-      
+
       const querySnapshot = await getDocs(q);
       const shoes: Shoe[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         shoes.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Shoe);
       });
-      
+
       return shoes;
     } catch (error) {
-      console.error('Error getting shoes by fantasy ID:', error);
-      throw new Error('Failed to fetch shoes by fantasy ID');
+      console.error("Error getting shoes by fantasy ID:", error);
+      throw new Error("Failed to fetch shoes by fantasy ID");
     }
   }
 
@@ -111,29 +116,33 @@ class ShoesService {
     try {
       const docRef = doc(db, this.collectionName, shoeId);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         return {
           id: docSnap.id,
-          ...docSnap.data()
+          ...docSnap.data(),
         } as Shoe;
       } else {
         return null;
       }
     } catch (error) {
-      console.error('Error getting shoe:', error);
-      throw new Error('Failed to fetch shoe');
+      console.error("Error getting shoe:", error);
+      throw new Error("Failed to fetch shoe");
     }
   }
 
   // Update shoe
-  async updateShoe(shoeId: string, data: Partial<CreateShoeData>): Promise<void> {
+  async updateShoe(
+    shoeId: string,
+    data: Partial<CreateShoeData>,
+  ): Promise<void> {
     try {
       const docRef = doc(db, this.collectionName, shoeId);
+
       await updateDoc(docRef, data);
     } catch (error) {
-      console.error('Error updating shoe:', error);
-      throw new Error('Failed to update shoe');
+      console.error("Error updating shoe:", error);
+      throw new Error("Failed to update shoe");
     }
   }
 
@@ -141,10 +150,11 @@ class ShoesService {
   async deleteShoe(shoeId: string): Promise<void> {
     try {
       const docRef = doc(db, this.collectionName, shoeId);
+
       await deleteDoc(docRef);
     } catch (error) {
-      console.error('Error deleting shoe:', error);
-      throw new Error('Failed to delete shoe');
+      console.error("Error deleting shoe:", error);
+      throw new Error("Failed to delete shoe");
     }
   }
 
@@ -152,73 +162,79 @@ class ShoesService {
   async getShoesBySize(size: number, fantasyId?: string): Promise<Shoe[]> {
     try {
       let q;
+
       if (fantasyId) {
         q = query(
           collection(db, this.collectionName),
-          where('size', '==', size),
-          where('fantasyId', '==', fantasyId),
-          orderBy('createdAt', 'desc')
+          where("size", "==", size),
+          where("fantasyId", "==", fantasyId),
+          orderBy("createdAt", "desc"),
         );
       } else {
         q = query(
           collection(db, this.collectionName),
-          where('size', '==', size),
-          orderBy('createdAt', 'desc')
+          where("size", "==", size),
+          orderBy("createdAt", "desc"),
         );
       }
-      
+
       const querySnapshot = await getDocs(q);
       const shoes: Shoe[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         shoes.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Shoe);
       });
-      
+
       return shoes;
     } catch (error) {
-      console.error('Error getting shoes by size:', error);
-      throw new Error('Failed to fetch shoes by size');
+      console.error("Error getting shoes by size:", error);
+      throw new Error("Failed to fetch shoes by size");
     }
   }
 
   // Get shoes by price range
-  async getShoesByPriceRange(minPrice: number, maxPrice: number, fantasyId?: string): Promise<Shoe[]> {
+  async getShoesByPriceRange(
+    minPrice: number,
+    maxPrice: number,
+    fantasyId?: string,
+  ): Promise<Shoe[]> {
     try {
       let q;
+
       if (fantasyId) {
         q = query(
           collection(db, this.collectionName),
-          where('price', '>=', minPrice),
-          where('price', '<=', maxPrice),
-          where('fantasyId', '==', fantasyId),
-          orderBy('price', 'asc')
+          where("price", ">=", minPrice),
+          where("price", "<=", maxPrice),
+          where("fantasyId", "==", fantasyId),
+          orderBy("price", "asc"),
         );
       } else {
         q = query(
           collection(db, this.collectionName),
-          where('price', '>=', minPrice),
-          where('price', '<=', maxPrice),
-          orderBy('price', 'asc')
+          where("price", ">=", minPrice),
+          where("price", "<=", maxPrice),
+          orderBy("price", "asc"),
         );
       }
-      
+
       const querySnapshot = await getDocs(q);
       const shoes: Shoe[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         shoes.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Shoe);
       });
-      
+
       return shoes;
     } catch (error) {
-      console.error('Error getting shoes by price range:', error);
-      throw new Error('Failed to fetch shoes by price range');
+      console.error("Error getting shoes by price range:", error);
+      throw new Error("Failed to fetch shoes by price range");
     }
   }
 }

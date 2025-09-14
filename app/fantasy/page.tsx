@@ -1,9 +1,11 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ProtectedRoute } from '@/components/protected-route';
-import EventsTab from './components/events-tab';
-import { EventProvider } from './context/event-context';
+import React from "react";
+
+import EventsTab from "./components/events-tab";
+import { EventProvider } from "./context/event-context";
+
+import { ProtectedRoute } from "@/components/protected-route";
 
 export default function FantasyPage() {
   return (

@@ -1,19 +1,20 @@
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  getDocs, 
-  getDoc, 
-  query, 
-  orderBy, 
-  where, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  getDoc,
+  query,
+  orderBy,
+  where,
   Timestamp,
   DocumentData,
-  QuerySnapshot
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+  QuerySnapshot,
+} from "firebase/firestore";
+
+import { db } from "@/lib/firebase";
 
 export interface Team {
   id?: string;
@@ -34,21 +35,25 @@ export interface CreateTeamData {
 }
 
 class TeamsService {
-  private collectionName = 'teams';
+  private collectionName = "teams";
 
   // Create a new team
   async createTeam(data: CreateTeamData): Promise<string> {
     try {
-      const teamData: Omit<Team, 'id'> = {
+      const teamData: Omit<Team, "id"> = {
         ...data,
-        createdAt: Timestamp.now()
+        createdAt: Timestamp.now(),
       };
-      
-      const docRef = await addDoc(collection(db, this.collectionName), teamData);
+
+      const docRef = await addDoc(
+        collection(db, this.collectionName),
+        teamData,
+      );
+
       return docRef.id;
     } catch (error) {
-      console.error('Error creating team:', error);
-      throw new Error('Failed to create team');
+      console.error("Error creating team:", error);
+      throw new Error("Failed to create team");
     }
   }
 
@@ -57,23 +62,23 @@ class TeamsService {
     try {
       const q = query(
         collection(db, this.collectionName),
-        orderBy('createdAt', 'desc')
+        orderBy("createdAt", "desc"),
       );
-      
+
       const querySnapshot: QuerySnapshot<DocumentData> = await getDocs(q);
       const teams: Team[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         teams.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Team);
       });
-      
+
       return teams;
     } catch (error) {
-      console.error('Error getting teams:', error);
-      throw new Error('Failed to fetch teams');
+      console.error("Error getting teams:", error);
+      throw new Error("Failed to fetch teams");
     }
   }
 
@@ -82,24 +87,24 @@ class TeamsService {
     try {
       const q = query(
         collection(db, this.collectionName),
-        where('fantasyId', '==', fantasyId),
-        orderBy('createdAt', 'desc')
+        where("fantasyId", "==", fantasyId),
+        orderBy("createdAt", "desc"),
       );
-      
+
       const querySnapshot = await getDocs(q);
       const teams: Team[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         teams.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Team);
       });
-      
+
       return teams;
     } catch (error) {
-      console.error('Error getting teams by fantasy ID:', error);
-      throw new Error('Failed to fetch teams by fantasy ID');
+      console.error("Error getting teams by fantasy ID:", error);
+      throw new Error("Failed to fetch teams by fantasy ID");
     }
   }
 
@@ -108,29 +113,33 @@ class TeamsService {
     try {
       const docRef = doc(db, this.collectionName, teamId);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         return {
           id: docSnap.id,
-          ...docSnap.data()
+          ...docSnap.data(),
         } as Team;
       } else {
         return null;
       }
     } catch (error) {
-      console.error('Error getting team:', error);
-      throw new Error('Failed to fetch team');
+      console.error("Error getting team:", error);
+      throw new Error("Failed to fetch team");
     }
   }
 
   // Update team
-  async updateTeam(teamId: string, data: Partial<CreateTeamData>): Promise<void> {
+  async updateTeam(
+    teamId: string,
+    data: Partial<CreateTeamData>,
+  ): Promise<void> {
     try {
       const docRef = doc(db, this.collectionName, teamId);
+
       await updateDoc(docRef, data);
     } catch (error) {
-      console.error('Error updating team:', error);
-      throw new Error('Failed to update team');
+      console.error("Error updating team:", error);
+      throw new Error("Failed to update team");
     }
   }
 
@@ -138,10 +147,11 @@ class TeamsService {
   async deleteTeam(teamId: string): Promise<void> {
     try {
       const docRef = doc(db, this.collectionName, teamId);
+
       await deleteDoc(docRef);
     } catch (error) {
-      console.error('Error deleting team:', error);
-      throw new Error('Failed to delete team');
+      console.error("Error deleting team:", error);
+      throw new Error("Failed to delete team");
     }
   }
 
@@ -149,35 +159,36 @@ class TeamsService {
   async getTeamsBySize(size: string, fantasyId?: string): Promise<Team[]> {
     try {
       let q;
+
       if (fantasyId) {
         q = query(
           collection(db, this.collectionName),
-          where('size', '==', size),
-          where('fantasyId', '==', fantasyId),
-          orderBy('createdAt', 'desc')
+          where("size", "==", size),
+          where("fantasyId", "==", fantasyId),
+          orderBy("createdAt", "desc"),
         );
       } else {
         q = query(
           collection(db, this.collectionName),
-          where('size', '==', size),
-          orderBy('createdAt', 'desc')
+          where("size", "==", size),
+          orderBy("createdAt", "desc"),
         );
       }
-      
+
       const querySnapshot = await getDocs(q);
       const teams: Team[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         teams.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Team);
       });
-      
+
       return teams;
     } catch (error) {
-      console.error('Error getting teams by size:', error);
-      throw new Error('Failed to fetch teams by size');
+      console.error("Error getting teams by size:", error);
+      throw new Error("Failed to fetch teams by size");
     }
   }
 }

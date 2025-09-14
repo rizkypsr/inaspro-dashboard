@@ -1,65 +1,146 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardBody, CardHeader } from '@heroui/card';
-import { Button } from '@heroui/button';
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/table';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/dropdown';
-import { Input } from '@heroui/input';
-import { Spinner } from '@heroui/spinner';
-import { Chip } from '@heroui/chip';
+import React, { useState, useEffect } from "react";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Button } from "@heroui/button";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@heroui/table";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
+import { Input } from "@heroui/input";
+import { Spinner } from "@heroui/spinner";
+import { Chip } from "@heroui/chip";
 
-import { Select, SelectItem } from '@heroui/select';
-import { SalesReport, ExportOptions } from '../../../types/marketplace';
-import { ProtectedRoute } from '../../../components/protected-route';
+import { SalesReport, ExportOptions } from "../../../types/marketplace";
+import { ProtectedRoute } from "../../../components/protected-route";
 
 // Icons as SVG components
 const DownloadIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+    />
   </svg>
 );
 
 const CalendarIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+    />
   </svg>
 );
 
 const FilterIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+    />
   </svg>
 );
 
 const TrendingUpIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+    />
   </svg>
 );
 
 const DollarSignIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+    />
   </svg>
 );
 
 const ShoppingBagIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z" />
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+    />
   </svg>
 );
 
 const PercentIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+    />
   </svg>
 );
 
 // Toast utility
 const toast = {
   success: (message: string) => alert(`Success: ${message}`),
-  error: (message: string) => alert(`Error: ${message}`)
+  error: (message: string) => alert(`Error: ${message}`),
 };
 
 interface ReportFilters {
@@ -83,44 +164,45 @@ const mockSalesReportsService = {
     // Mock data for demonstration
     const mockReports: SalesReport[] = [
       {
-        reportId: 'rpt_001',
-        orderId: 'ord_001',
+        reportId: "rpt_001",
+        orderId: "ord_001",
         totalAmount: 250000,
         finalAmount: 225000,
-        voucherId: 'DISC10',
-        createdAt: new Date('2024-01-15')
+        voucherId: "DISC10",
+        createdAt: new Date("2024-01-15"),
       },
       {
-        reportId: 'rpt_002',
-        orderId: 'ord_002',
+        reportId: "rpt_002",
+        orderId: "ord_002",
         totalAmount: 180000,
         finalAmount: 180000,
-        createdAt: new Date('2024-01-16')
+        createdAt: new Date("2024-01-16"),
       },
       {
-        reportId: 'rpt_003',
-        orderId: 'ord_003',
+        reportId: "rpt_003",
+        orderId: "ord_003",
         totalAmount: 320000,
         finalAmount: 288000,
-        voucherId: 'SAVE20',
-        createdAt: new Date('2024-01-17')
-      }
+        voucherId: "SAVE20",
+        createdAt: new Date("2024-01-17"),
+      },
     ];
-    
+
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     return mockReports;
   },
 
   async exportReports(options: ExportOptions): Promise<void> {
     // Mock export functionality
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // In a real implementation, this would generate and download the file
-    const filename = `sales-report-${new Date().toISOString().split('T')[0]}.${options.format}`;
+    const filename = `sales-report-${new Date().toISOString().split("T")[0]}.${options.format}`;
+
     console.log(`Exporting report as ${filename}`);
-  }
+  },
 };
 
 export default function SalesReportsPage() {
@@ -133,7 +215,7 @@ export default function SalesReportsPage() {
     totalOrders: 0,
     averageOrderValue: 0,
     totalDiscount: 0,
-    discountPercentage: 0
+    discountPercentage: 0,
   });
 
   useEffect(() => {
@@ -148,10 +230,11 @@ export default function SalesReportsPage() {
     try {
       setLoading(true);
       const response = await mockSalesReportsService.getSalesReports(filters);
+
       setReports(response);
     } catch (error) {
-      console.error('Error loading sales reports:', error);
-      toast.error('Failed to load sales reports');
+      console.error("Error loading sales reports:", error);
+      toast.error("Failed to load sales reports");
     } finally {
       setLoading(false);
     }
@@ -164,24 +247,32 @@ export default function SalesReportsPage() {
         totalOrders: 0,
         averageOrderValue: 0,
         totalDiscount: 0,
-        discountPercentage: 0
+        discountPercentage: 0,
       });
+
       return;
     }
 
-    const totalRevenue = reports.reduce((sum, report) => sum + report.finalAmount, 0);
-    const totalOriginalAmount = reports.reduce((sum, report) => sum + report.totalAmount, 0);
+    const totalRevenue = reports.reduce(
+      (sum, report) => sum + report.finalAmount,
+      0,
+    );
+    const totalOriginalAmount = reports.reduce(
+      (sum, report) => sum + report.totalAmount,
+      0,
+    );
     const totalDiscount = totalOriginalAmount - totalRevenue;
     const totalOrders = reports.length;
     const averageOrderValue = totalRevenue / totalOrders;
-    const discountPercentage = totalOriginalAmount > 0 ? (totalDiscount / totalOriginalAmount) * 100 : 0;
+    const discountPercentage =
+      totalOriginalAmount > 0 ? (totalDiscount / totalOriginalAmount) * 100 : 0;
 
     setStats({
       totalRevenue,
       totalOrders,
       averageOrderValue,
       totalDiscount,
-      discountPercentage
+      discountPercentage,
     });
   };
 
@@ -189,21 +280,21 @@ export default function SalesReportsPage() {
     await loadReports();
   };
 
-  const handleExport = async (format: 'csv' | 'xlsx') => {
+  const handleExport = async (format: "csv" | "xlsx") => {
     try {
       setExporting(true);
       const exportOptions: ExportOptions = {
         format,
         dateFrom: filters.dateFrom,
         dateTo: filters.dateTo,
-        filters
+        filters,
       };
-      
+
       await mockSalesReportsService.exportReports(exportOptions);
       toast.success(`Report exported successfully as ${format.toUpperCase()}`);
     } catch (error) {
-      console.error('Error exporting report:', error);
-      toast.error('Failed to export report');
+      console.error("Error exporting report:", error);
+      toast.error("Failed to export report");
     } finally {
       setExporting(false);
     }
@@ -214,10 +305,10 @@ export default function SalesReportsPage() {
   };
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('id-ID', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Intl.DateTimeFormat("id-ID", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     }).format(date);
   };
 
@@ -231,30 +322,26 @@ export default function SalesReportsPage() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold">Sales Reports</h1>
-            <p className="text-default-500">View and export sales performance data</p>
+            <p className="text-default-500">
+              View and export sales performance data
+            </p>
           </div>
           <div className="flex gap-2">
             <Dropdown>
               <DropdownTrigger>
-                <Button 
-                  color="primary" 
-                  startContent={<DownloadIcon />}
+                <Button
+                  color="primary"
                   isLoading={exporting}
+                  startContent={<DownloadIcon />}
                 >
                   Export Report
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem
-                  key="csv"
-                  onPress={() => handleExport('csv')}
-                >
+                <DropdownItem key="csv" onPress={() => handleExport("csv")}>
                   Export as CSV
                 </DropdownItem>
-                <DropdownItem
-                  key="xlsx"
-                  onPress={() => handleExport('xlsx')}
-                >
+                <DropdownItem key="xlsx" onPress={() => handleExport("xlsx")}>
                   Export as Excel
                 </DropdownItem>
               </DropdownMenu>
@@ -274,53 +361,69 @@ export default function SalesReportsPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Input
                 label="Date From"
+                startContent={<CalendarIcon />}
                 type="date"
-                value={filters.dateFrom ? filters.dateFrom.toISOString().split('T')[0] : ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  setFilters(prev => ({ 
-                    ...prev, 
-                    dateFrom: e.target.value ? new Date(e.target.value) : undefined 
+                value={
+                  filters.dateFrom
+                    ? filters.dateFrom.toISOString().split("T")[0]
+                    : ""
+                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    dateFrom: e.target.value
+                      ? new Date(e.target.value)
+                      : undefined,
                   }))
                 }
-                startContent={<CalendarIcon />}
               />
               <Input
                 label="Date To"
+                startContent={<CalendarIcon />}
                 type="date"
-                value={filters.dateTo ? filters.dateTo.toISOString().split('T')[0] : ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  setFilters(prev => ({ 
-                    ...prev, 
-                    dateTo: e.target.value ? new Date(e.target.value) : undefined 
+                value={
+                  filters.dateTo
+                    ? filters.dateTo.toISOString().split("T")[0]
+                    : ""
+                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    dateTo: e.target.value
+                      ? new Date(e.target.value)
+                      : undefined,
                   }))
                 }
-                startContent={<CalendarIcon />}
               />
               <Input
                 label="Min Amount (Rp)"
-                type="number"
                 placeholder="0"
-                value={filters.minAmount?.toString() || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  setFilters(prev => ({ 
-                    ...prev, 
-                    minAmount: e.target.value ? parseFloat(e.target.value) : undefined 
+                startContent={<DollarSignIcon />}
+                type="number"
+                value={filters.minAmount?.toString() || ""}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    minAmount: e.target.value
+                      ? parseFloat(e.target.value)
+                      : undefined,
                   }))
                 }
-                startContent={<DollarSignIcon />}
               />
               <Input
                 label="Max Amount (Rp)"
-                type="number"
                 placeholder="No limit"
-                value={filters.maxAmount?.toString() || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  setFilters(prev => ({ 
-                    ...prev, 
-                    maxAmount: e.target.value ? parseFloat(e.target.value) : undefined 
+                startContent={<DollarSignIcon />}
+                type="number"
+                value={filters.maxAmount?.toString() || ""}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    maxAmount: e.target.value
+                      ? parseFloat(e.target.value)
+                      : undefined,
                   }))
                 }
-                startContent={<DollarSignIcon />}
               />
             </div>
             <div className="flex justify-end mt-4">
@@ -401,7 +504,9 @@ export default function SalesReportsPage() {
         {/* Reports Table */}
         <Card>
           <CardHeader>
-            <h3 className="text-lg font-semibold">Sales Reports ({reports.length})</h3>
+            <h3 className="text-lg font-semibold">
+              Sales Reports ({reports.length})
+            </h3>
           </CardHeader>
           <CardBody>
             {loading ? (
@@ -461,7 +566,7 @@ export default function SalesReportsPage() {
                       </TableCell>
                       <TableCell>
                         {report.voucherId ? (
-                          <Chip size="sm" color="secondary" variant="flat">
+                          <Chip color="secondary" size="sm" variant="flat">
                             {report.voucherId}
                           </Chip>
                         ) : (

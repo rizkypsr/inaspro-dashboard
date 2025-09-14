@@ -1,16 +1,20 @@
-'use client';
+"use client";
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Spinner } from '@heroui/spinner';
-import { useAuth } from '@/lib/auth-context';
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Spinner } from "@heroui/spinner";
+
+import { useAuth } from "@/lib/auth-context";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
 }
 
-export function ProtectedRoute({ children, requireAdmin = true }: ProtectedRouteProps) {
+export function ProtectedRoute({
+  children,
+  requireAdmin = true,
+}: ProtectedRouteProps) {
   const { user, userData, loading, isAdmin } = useAuth();
   const router = useRouter();
 
@@ -18,13 +22,15 @@ export function ProtectedRoute({ children, requireAdmin = true }: ProtectedRoute
     if (!loading) {
       // If no user is authenticated, redirect to login
       if (!user) {
-        router.push('/login');
+        router.push("/login");
+
         return;
       }
 
       // If admin is required but user is not admin, redirect to login
       if (requireAdmin && !isAdmin) {
-        router.push('/login');
+        router.push("/login");
+
         return;
       }
     }
@@ -35,10 +41,8 @@ export function ProtectedRoute({ children, requireAdmin = true }: ProtectedRoute
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Spinner size="lg" color="primary" />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
-            Loading...
-          </p>
+          <Spinner color="primary" size="lg" />
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
     );
@@ -55,7 +59,7 @@ export function ProtectedRoute({ children, requireAdmin = true }: ProtectedRoute
 // Higher-order component for protecting pages
 export function withAuth<P extends object>(
   Component: React.ComponentType<P>,
-  requireAdmin = true
+  requireAdmin = true,
 ) {
   return function AuthenticatedComponent(props: P) {
     return (

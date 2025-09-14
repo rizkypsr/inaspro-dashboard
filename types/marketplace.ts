@@ -34,7 +34,7 @@ export interface OrderItem {
 }
 
 export interface PaymentInfo {
-  status: 'pending' | 'paid' | 'failed';
+  status: "pending" | "paid" | "failed";
   method: string;
   xenditInvoiceId?: string;
 }
@@ -62,7 +62,7 @@ export interface Order {
   payment: PaymentInfo;
   shippingAddress: ShippingAddress;
   logistics: LogisticsInfo;
-  status: 'pending' | 'processing' | 'shipped' | 'completed' | 'cancelled';
+  status: "pending" | "processing" | "shipped" | "completed" | "cancelled";
   reservedUntil: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -71,7 +71,7 @@ export interface Order {
 export interface Voucher {
   voucherId: string;
   code: string;
-  type: 'percentage' | 'flat';
+  type: "percentage" | "flat";
   value: number;
   minPurchase: number;
   validUntil: Date;
@@ -95,7 +95,7 @@ export interface SalesReport {
 
 export interface Notification {
   notifId: string;
-  type: 'order' | 'payment' | 'stock';
+  type: "order" | "payment" | "stock";
   title: string;
   message: string;
   isRead: boolean;
@@ -109,7 +109,7 @@ export interface CreateProductData {
   images: string[];
   price: number;
   categoryId: string;
-  variants?: Omit<ProductVariant, 'variantId'>[];
+  variants?: Omit<ProductVariant, "variantId">[];
 }
 
 export interface UpdateProductData extends Partial<CreateProductData> {
@@ -122,7 +122,7 @@ export interface CreateCategoryData {
 
 export interface CreateVoucherData {
   code: string;
-  type: 'percentage' | 'flat';
+  type: "percentage" | "flat";
   value: number;
   minPurchase: number;
   validUntil: Date;
@@ -131,7 +131,7 @@ export interface CreateVoucherData {
 
 export interface UpdateOrderStatusData {
   orderId: string;
-  status: Order['status'];
+  status: Order["status"];
   trackingNumber?: string;
 }
 
@@ -145,11 +145,12 @@ export interface ProductFilters {
 }
 
 export interface OrderFilters {
-  status?: Order['status'];
-  paymentStatus?: PaymentInfo['status'];
+  status?: Order["status"];
+  paymentStatus?: PaymentInfo["status"];
   dateFrom?: Date;
   dateTo?: Date;
   userId?: string;
+  search?: string;
 }
 
 export interface PaginationParams {
@@ -177,7 +178,7 @@ export interface MarketplaceStats {
 
 // Export types
 export interface ExportOptions {
-  format: 'csv' | 'xlsx';
+  format: "csv" | "xlsx";
   dateFrom?: Date;
   dateTo?: Date;
   filters?: any;
