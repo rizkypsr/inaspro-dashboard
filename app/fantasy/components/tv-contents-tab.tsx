@@ -1,38 +1,32 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Table,
   TableHeader,
   TableColumn,
   TableBody,
   TableRow,
-  TableCell,
-} from "@heroui/table";
-import { Button } from "@heroui/button";
+  TableCell
+} from '@heroui/table';
+import { Button } from '@heroui/button';
 import {
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
-  useDisclosure,
-} from "@heroui/modal";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { Tooltip } from "@heroui/tooltip";
-import { Spinner } from "@heroui/spinner";
-
-import {
-  TvCategory,
-  TvContent,
-  CreateTvContentData,
-  UpdateTvContentData,
-} from "../../../types/tv";
-import { TvCategoriesService } from "../../../lib/services/tv-categories-service";
-import { TvContentsService } from "../../../lib/services/tv-contents-service";
-
-import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from "@/components/icons";
+  useDisclosure
+} from '@heroui/modal';
+import { Input } from '@heroui/input';
+import { Select, SelectItem } from '@heroui/select';
+import { Chip } from '@heroui/chip';
+import { Tooltip } from '@heroui/tooltip';
+import { Spinner } from '@heroui/spinner';
+import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from '@/components/icons';
+import { TvCategory, TvContent, CreateTvContentData, UpdateTvContentData } from '../../../types/tv';
+import { TvCategoriesService } from '../../../lib/services/tv-categories-service';
+import { TvContentsService } from '../../../lib/services/tv-contents-service';
 
 interface FormData {
   title: string;
@@ -43,20 +37,18 @@ interface FormData {
 export default function TvContentsTab() {
   const [categories, setCategories] = useState<TvCategory[]>([]);
   const [contents, setContents] = useState<TvContent[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [contentsLoading, setContentsLoading] = useState(false);
-  const [selectedContent, setSelectedContent] = useState<TvContent | null>(
-    null,
-  );
+  const [selectedContent, setSelectedContent] = useState<TvContent | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    title: "",
-    image: "",
-    link: "",
+    title: '',
+    image: '',
+    link: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
@@ -75,13 +67,12 @@ export default function TvContentsTab() {
     try {
       setLoading(true);
       const data = await TvCategoriesService.getCategories();
-
       setCategories(data);
       if (data.length > 0 && !selectedCategoryId) {
         setSelectedCategoryId(data[0].id);
       }
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      console.error('Error fetching categories:', error);
     } finally {
       setLoading(false);
     }
@@ -89,14 +80,13 @@ export default function TvContentsTab() {
 
   const fetchContents = async () => {
     if (!selectedCategoryId) return;
-
+    
     try {
       setContentsLoading(true);
       const data = await TvContentsService.getContents(selectedCategoryId);
-
       setContents(data);
     } catch (error) {
-      console.error("Error fetching contents:", error);
+      console.error('Error fetching contents:', error);
     } finally {
       setContentsLoading(false);
     }
@@ -104,15 +94,14 @@ export default function TvContentsTab() {
 
   const handleAdd = () => {
     if (!selectedCategoryId) {
-      alert("Please select a category first");
-
+      alert('Please select a category first');
       return;
     }
-
+    
     setFormData({
-      title: "",
-      image: "",
-      link: "",
+      title: '',
+      image: '',
+      link: ''
     });
     setSelectedContent(null);
     setIsEditing(false);
@@ -123,7 +112,7 @@ export default function TvContentsTab() {
     setFormData({
       title: content.title,
       image: content.image,
-      link: content.link,
+      link: content.link
     });
     setSelectedContent(content);
     setIsEditing(true);
@@ -139,59 +128,50 @@ export default function TvContentsTab() {
       await TvContentsService.deleteContent(selectedCategoryId, content.id);
       fetchContents();
     } catch (error) {
-      console.error("Error deleting content:", error);
+      console.error('Error deleting content:', error);
     }
   };
 
   const handleSubmit = async () => {
     if (!formData.title.trim()) {
-      alert("Title is required");
-
+      alert('Title is required');
       return;
     }
 
     if (!formData.image.trim()) {
-      alert("Image URL is required");
-
+      alert('Image URL is required');
       return;
     }
 
     if (!formData.link.trim()) {
-      alert("Link is required");
-
+      alert('Link is required');
       return;
     }
 
     try {
       setIsSubmitting(true);
-
+      
       if (isEditing && selectedContent) {
         const updateData: UpdateTvContentData = {
           title: formData.title,
           image: formData.image,
-          link: formData.link,
+          link: formData.link
         };
-
-        await TvContentsService.updateContent(
-          selectedCategoryId,
-          selectedContent.id,
-          updateData,
-        );
+        await TvContentsService.updateContent(selectedCategoryId, selectedContent.id, updateData);
       } else {
         const createData: CreateTvContentData = {
           title: formData.title,
           image: formData.image,
-          link: formData.link,
+          link: formData.link
         };
-
         await TvContentsService.createContent(selectedCategoryId, createData);
       }
-
+      
       onClose();
       fetchContents();
     } catch (error) {
-      console.error("Error saving content:", error);
-      alert("Failed to save content");
+      console.error('Error saving content:', error);
+      alert('Failed to save content');
     } finally {
       setIsSubmitting(false);
     }
@@ -199,25 +179,24 @@ export default function TvContentsTab() {
 
   const handleModalClose = () => {
     onClose();
-    setFormData({ title: "", image: "", link: "" });
+    setFormData({ title: '', image: '', link: '' });
     setSelectedContent(null);
     setIsEditing(false);
   };
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     }).format(date);
   };
 
   const getSelectedCategoryName = () => {
-    const category = categories.find((cat) => cat.id === selectedCategoryId);
-
-    return category ? category.title : "Select Category";
+    const category = categories.find(cat => cat.id === selectedCategoryId);
+    return category ? category.title : 'Select Category';
   };
 
   if (loading) {
@@ -235,27 +214,28 @@ export default function TvContentsTab() {
           <h2 className="text-2xl font-bold">TV Contents</h2>
           {categories.length > 0 && (
             <Select
-              className="w-64"
               label="Category"
               placeholder="Select a category"
               selectedKeys={selectedCategoryId ? [selectedCategoryId] : []}
               onSelectionChange={(keys) => {
                 const selected = Array.from(keys)[0] as string;
-
                 setSelectedCategoryId(selected);
               }}
+              className="w-64"
             >
               {categories.map((category) => (
-                <SelectItem key={category.id}>{category.title}</SelectItem>
+                <SelectItem key={category.id}>
+                  {category.title}
+                </SelectItem>
               ))}
             </Select>
           )}
         </div>
         <Button
           color="primary"
-          isDisabled={!selectedCategoryId}
           startContent={<PlusIcon className="h-4 w-4" />}
           onPress={handleAdd}
+          isDisabled={!selectedCategoryId}
         >
           Add Content
         </Button>
@@ -264,8 +244,7 @@ export default function TvContentsTab() {
       {selectedCategoryId && (
         <div className="bg-gray-50 p-4 rounded-lg">
           <p className="text-sm text-gray-600">
-            Managing contents for:{" "}
-            <span className="font-semibold">{getSelectedCategoryName()}</span>
+            Managing contents for: <span className="font-semibold">{getSelectedCategoryName()}</span>
           </p>
         </div>
       )}
@@ -283,13 +262,7 @@ export default function TvContentsTab() {
             <TableColumn>CREATED AT</TableColumn>
             <TableColumn>ACTIONS</TableColumn>
           </TableHeader>
-          <TableBody
-            emptyContent={
-              selectedCategoryId
-                ? "No contents found"
-                : "Select a category to view contents"
-            }
-          >
+          <TableBody emptyContent={selectedCategoryId ? "No contents found" : "Select a category to view contents"}>
             {contents.map((content) => (
               <TableRow key={content.id}>
                 <TableCell>
@@ -297,12 +270,12 @@ export default function TvContentsTab() {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <img
+                    <img 
+                      src={content.image} 
                       alt={content.title}
                       className="w-12 h-12 object-cover rounded"
-                      src={content.image}
                       onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                        e.currentTarget.src = "/placeholder-image.png";
+                        e.currentTarget.src = '/placeholder-image.png';
                       }}
                     />
                     <span className="text-xs text-gray-500 truncate max-w-32">
@@ -312,11 +285,11 @@ export default function TvContentsTab() {
                 </TableCell>
                 <TableCell>
                   <Tooltip content={content.link}>
-                    <a
-                      className="text-blue-600 hover:text-blue-800 truncate max-w-32 block"
-                      href={content.link}
+                    <a 
+                      href={content.link} 
+                      target="_blank" 
                       rel="noopener noreferrer"
-                      target="_blank"
+                      className="text-blue-600 hover:text-blue-800 truncate max-w-32 block"
                     >
                       {content.link}
                     </a>
@@ -332,11 +305,11 @@ export default function TvContentsTab() {
                     <Tooltip content="View content">
                       <Button
                         isIconOnly
+                        size="sm"
+                        variant="light"
                         as="a"
                         href={content.link}
-                        size="sm"
                         target="_blank"
-                        variant="light"
                       >
                         <EyeIcon className="h-4 w-4" />
                       </Button>
@@ -351,12 +324,12 @@ export default function TvContentsTab() {
                         <PencilIcon className="h-4 w-4" />
                       </Button>
                     </Tooltip>
-                    <Tooltip color="danger" content="Delete content">
+                    <Tooltip content="Delete content" color="danger">
                       <Button
                         isIconOnly
-                        color="danger"
                         size="sm"
                         variant="light"
+                        color="danger"
                         onPress={() => handleDelete(content)}
                       >
                         <TrashIcon className="h-4 w-4" />
@@ -370,49 +343,43 @@ export default function TvContentsTab() {
         </Table>
       )}
 
-      <Modal isOpen={isOpen} size="lg" onClose={handleModalClose}>
+      <Modal isOpen={isOpen} onClose={handleModalClose} size="lg">
         <ModalContent>
           <ModalHeader>
-            {isEditing ? "Edit Content" : "Add New Content"}
+            {isEditing ? 'Edit Content' : 'Add New Content'}
           </ModalHeader>
           <ModalBody>
             <div className="space-y-4">
               <Input
-                isRequired
                 label="Title"
                 placeholder="Enter content title"
                 value={formData.title}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
+                isRequired
               />
               <Input
-                isRequired
                 label="Image URL"
                 placeholder="Enter image URL"
                 value={formData.image}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFormData({ ...formData, image: e.target.value })
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, image: e.target.value })}
+                isRequired
               />
               <Input
-                isRequired
                 label="Link"
                 placeholder="Enter content link"
                 value={formData.link}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFormData({ ...formData, link: e.target.value })
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, link: e.target.value })}
+                isRequired
               />
               {formData.image && (
                 <div className="mt-2">
                   <p className="text-sm text-gray-600 mb-2">Image Preview:</p>
-                  <img
+                  <img 
+                    src={formData.image} 
                     alt="Preview"
                     className="w-32 h-32 object-cover rounded border"
-                    src={formData.image}
                     onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                      e.currentTarget.src = "/placeholder-image.png";
+                      e.currentTarget.src = '/placeholder-image.png';
                     }}
                   />
                 </div>
@@ -425,10 +392,10 @@ export default function TvContentsTab() {
             </Button>
             <Button
               color="primary"
-              isLoading={isSubmitting}
               onPress={handleSubmit}
+              isLoading={isSubmitting}
             >
-              {isEditing ? "Update" : "Create"}
+              {isEditing ? 'Update' : 'Create'}
             </Button>
           </ModalFooter>
         </ModalContent>

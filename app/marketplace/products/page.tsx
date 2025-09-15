@@ -678,9 +678,10 @@ export default function ProductsPage() {
                   <span className="text-sm font-medium mb-2 block">
                     Product Variants
                   </span>
-                  <div className="grid grid-cols-4 gap-2 mb-2">
+                  <div className="grid grid-cols-5 gap-2 mb-2">
                     <Input
-                      placeholder="Variant name"
+                      label="Variant Name"
+                      placeholder="e.g., Red, Large"
                       value={variantForm.name}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setVariantForm((prev) => ({
@@ -690,7 +691,8 @@ export default function ProductsPage() {
                       }
                     />
                     <Input
-                      placeholder="SKU"
+                      label="SKU"
+                      placeholder="e.g., PROD-001-RED"
                       value={variantForm.sku}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setVariantForm((prev) => ({
@@ -700,7 +702,8 @@ export default function ProductsPage() {
                       }
                     />
                     <Input
-                      placeholder="Price"
+                      label="Price"
+                      placeholder="0"
                       type="number"
                       value={variantForm.price.toString()}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -710,19 +713,20 @@ export default function ProductsPage() {
                         }))
                       }
                     />
-                    <div className="flex gap-1">
-                      <Input
-                        placeholder="Stock"
-                        type="number"
-                        value={variantForm.stock.toString()}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setVariantForm((prev) => ({
-                            ...prev,
-                            stock: Number(e.target.value),
-                          }))
-                        }
-                      />
-                      <Button onPress={addVariant}>Add</Button>
+                    <Input
+                      label="Stock"
+                      placeholder="0"
+                      type="number"
+                      value={variantForm.stock.toString()}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setVariantForm((prev) => ({
+                          ...prev,
+                          stock: Number(e.target.value),
+                        }))
+                      }
+                    />
+                    <div className="flex items-end">
+                      <Button color="primary" onPress={addVariant}>Add</Button>
                     </div>
                   </div>
 
@@ -731,21 +735,24 @@ export default function ProductsPage() {
                       {formData.variants.map((variant, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between p-2 bg-default-100 rounded"
+                          className="p-3 bg-default-100 rounded-lg"
                         >
-                          <span>
-                            {variant.name} - {variant.sku} - Rp{" "}
-                            {variant.price.toLocaleString()} - Stock:{" "}
-                            {variant.stock}
-                          </span>
-                          <Button
-                            color="danger"
-                            size="sm"
-                            variant="light"
-                            onPress={() => removeVariant(index)}
-                          >
-                            Remove
-                          </Button>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">{variant.name}</span>
+                            <Button
+                              color="danger"
+                              size="sm"
+                              variant="light"
+                              onPress={() => removeVariant(index)}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-sm text-default-600">
+                            <span>SKU: {variant.sku}</span>
+                            <span>Price: Rp {variant.price.toLocaleString()}</span>
+                            <span>Stock: {variant.stock}</span>
+                          </div>
                         </div>
                       ))}
                     </div>

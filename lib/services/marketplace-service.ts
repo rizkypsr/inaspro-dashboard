@@ -6,6 +6,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  setDoc,
   query,
   where,
   orderBy,
@@ -387,7 +388,7 @@ export class LogisticsService {
   ): Promise<void> {
     const docRef = doc(db, this.collectionName, provinceId);
 
-    await updateDoc(docRef, data);
+    await setDoc(docRef, data, { merge: true });
   }
 }
 
