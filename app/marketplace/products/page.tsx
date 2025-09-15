@@ -45,7 +45,9 @@ import {
 } from "../../../types/marketplace";
 import { ProtectedRoute } from "../../../components/protected-route";
 import ImageUpload from "../../../components/image-upload";
-import ImageUploadService, { UploadResult } from "../../../lib/services/image-upload-service";
+import ImageUploadService, {
+  UploadResult,
+} from "../../../lib/services/image-upload-service";
 
 // Icons as SVG components
 const PlusIcon = () => (
@@ -242,11 +244,13 @@ export default function ProductsPage() {
     try {
       if (!formData.title || !formData.description || !formData.categoryId) {
         toast.error("Please fill in all required fields");
+
         return;
       }
 
       if (formData.variants.length === 0) {
         toast.error("Please add at least one product variant");
+
         return;
       }
 
@@ -339,9 +343,10 @@ export default function ProductsPage() {
 
   const removeImage = async (index: number) => {
     const imageUrl = formData.images[index];
-    
+
     // Extract storage path from URL and delete from Firebase Storage
     const imagePath = ImageUploadService.extractPathFromURL(imageUrl);
+
     if (imagePath) {
       try {
         await ImageUploadService.deleteImage(imagePath);
@@ -350,7 +355,7 @@ export default function ProductsPage() {
         // Continue with removal from form even if storage deletion fails
       }
     }
-    
+
     // Remove from form data
     setFormData((prev) => ({
       ...prev,
@@ -427,10 +432,14 @@ export default function ProductsPage() {
                 selectedKeys={selectedCategory ? [selectedCategory] : []}
                 onSelectionChange={(keys: any) => {
                   const selected = Array.from(keys)[0] as string;
+
                   setSelectedCategory(selected || "");
                 }}
               >
-                {[{ categoryId: "", title: "All Categories" }, ...categories].map((category) => (
+                {[
+                  { categoryId: "", title: "All Categories" },
+                  ...categories,
+                ].map((category) => (
                   <SelectItem key={category.categoryId}>
                     {category.title}
                   </SelectItem>
@@ -620,24 +629,24 @@ export default function ProductsPage() {
                   <span className="text-sm font-medium mb-2 block">
                     Product Images
                   </span>
-                  
+
                   {uploadError && (
                     <div className="mb-2 p-2 bg-danger-50 border border-danger-200 rounded text-danger-600 text-sm">
                       {uploadError}
                     </div>
                   )}
-                  
+
                   <div className="mb-4">
                     <ImageUpload
-                      onImageUploaded={handleImageUploaded}
-                      onError={handleImageUploadError}
-                      onUploadStart={handleImageUploadStart}
-                      productId={editingProduct?.productId}
-                      isUploading={isUploadingImage}
                       disabled={isUploadingImage}
+                      isUploading={isUploadingImage}
+                      productId={editingProduct?.productId}
+                      onError={handleImageUploadError}
+                      onImageUploaded={handleImageUploaded}
+                      onUploadStart={handleImageUploadStart}
                     />
                   </div>
-                  
+
                   {formData.images.length > 0 && (
                     <div className="grid grid-cols-4 gap-2">
                       {formData.images.map((image, index) => (

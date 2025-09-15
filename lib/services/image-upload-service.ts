@@ -1,4 +1,10 @@
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+
 import { storage } from "../firebase";
 
 export interface UploadResult {
@@ -17,7 +23,11 @@ export interface UploadError {
 export class ImageUploadService {
   private static readonly PRODUCTS_FOLDER = "products";
   private static readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-  private static readonly ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+  private static readonly ALLOWED_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+  ];
 
   /**
    * Upload an image file to Firebase Storage
@@ -27,7 +37,7 @@ export class ImageUploadService {
    */
   static async uploadImage(
     file: File,
-    productId?: string
+    productId?: string,
   ): Promise<UploadResult> {
     try {
       // Validate file
@@ -71,6 +81,7 @@ export class ImageUploadService {
   static async deleteImage(imagePath: string): Promise<void> {
     try {
       const storageRef = ref(storage, imagePath);
+
       await deleteObject(storageRef);
     } catch (error) {
       console.error("Error deleting image:", error);
@@ -88,6 +99,7 @@ export class ImageUploadService {
     try {
       const url = new URL(downloadURL);
       const pathMatch = url.pathname.match(/\/o\/(.*?)\?/);
+
       return pathMatch ? decodeURIComponent(pathMatch[1]) : null;
     } catch {
       return null;
@@ -105,13 +117,13 @@ export class ImageUploadService {
 
     if (file.size > this.MAX_FILE_SIZE) {
       throw new Error(
-        `File size too large. Maximum size is ${this.MAX_FILE_SIZE / 1024 / 1024}MB`
+        `File size too large. Maximum size is ${this.MAX_FILE_SIZE / 1024 / 1024}MB`,
       );
     }
 
     if (!this.ALLOWED_TYPES.includes(file.type)) {
       throw new Error(
-        `Invalid file type. Allowed types: ${this.ALLOWED_TYPES.join(", ")}`
+        `Invalid file type. Allowed types: ${this.ALLOWED_TYPES.join(", ")}`,
       );
     }
   }

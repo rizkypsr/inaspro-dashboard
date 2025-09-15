@@ -4,7 +4,10 @@ import React, { useState, useRef } from "react";
 import { Button } from "@heroui/button";
 import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
-import ImageUploadService, { UploadResult } from "../lib/services/image-upload-service";
+
+import ImageUploadService, {
+  UploadResult,
+} from "../lib/services/image-upload-service";
 
 interface ImageUploadProps {
   onImageUploaded: (result: UploadResult) => void;
@@ -63,14 +66,17 @@ export default function ImageUpload({
   className = "",
   isUploading: externalUploading = false,
 }: ImageUploadProps) {
-  const [uploadingFile, setUploadingFile] = useState<UploadingFile | null>(null);
+  const [uploadingFile, setUploadingFile] = useState<UploadingFile | null>(
+    null,
+  );
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    
+
     const file = files[0];
+
     uploadFile(file);
   };
 
@@ -78,46 +84,45 @@ export default function ImageUpload({
     try {
       // Create preview
       const preview = URL.createObjectURL(file);
+
       setUploadingFile({ file, preview, progress: 0 });
       onUploadStart?.();
 
       // Simulate progress (Firebase doesn't provide real-time progress for small files)
       const progressInterval = setInterval(() => {
-        setUploadingFile(prev => 
-          prev ? { ...prev, progress: Math.min(prev.progress + 20, 90) } : null
+        setUploadingFile((prev) =>
+          prev ? { ...prev, progress: Math.min(prev.progress + 20, 90) } : null,
         );
       }, 200);
 
       // Upload to Firebase Storage
       const result = await ImageUploadService.uploadImage(file, productId);
-      
+
       clearInterval(progressInterval);
-      setUploadingFile(prev => 
-        prev ? { ...prev, progress: 100 } : null
-      );
+      setUploadingFile((prev) => (prev ? { ...prev, progress: 100 } : null));
 
       // Clean up preview URL
       URL.revokeObjectURL(preview);
-      
+
       // Notify parent component
       onImageUploaded(result);
-      
+
       // Reset state
       setTimeout(() => {
         setUploadingFile(null);
       }, 500);
-      
     } catch (error: any) {
       console.error("Upload failed:", error);
-      
+
       // Clean up on error
       if (uploadingFile?.preview) {
         URL.revokeObjectURL(uploadingFile.preview);
       }
       setUploadingFile(null);
-      
+
       // Notify parent component
       const errorMessage = error.message || "Failed to upload image";
+
       onError?.(errorMessage);
     }
   };
@@ -136,10 +141,11 @@ export default function ImageUpload({
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (disabled || uploadingFile) return;
-    
+
     const files = e.dataTransfer.files;
+
     handleFileSelect(files);
   };
 
@@ -154,44 +160,54 @@ export default function ImageUpload({
     <div className={`w-full ${className}`}>
       <input
         ref={fileInputRef}
-        type="file"
         accept="image/jpeg,image/png,image/webp"
-        onChange={(e) => handleFileSelect(e.target.files)}
         className="hidden"
         disabled={disabled || isUploading}
+        type="file"
+        onChange={(e) => handleFileSelect(e.target.files)}
       />
-      
+
       <div
+        aria-label="Upload image by clicking or dragging and dropping"
         className={`
           relative border-2 border-dashed rounded-lg p-6 text-center transition-colors
-          ${dragActive 
-            ? "border-primary bg-primary/5" 
-            : "border-default-300 hover:border-default-400"
+          ${
+            dragActive
+              ? "border-primary bg-primary/5"
+              : "border-default-300 hover:border-default-400"
           }
           ${disabled || isUploading || externalUploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
         `}
+        role="button"
+        tabIndex={disabled || isUploading || externalUploading ? -1 : 0}
+        onClick={handleButtonClick}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        onClick={handleButtonClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleButtonClick();
+          }
+        }}
       >
         {isUploading ? (
           <div className="space-y-4">
             <div className="relative w-24 h-24 mx-auto">
               <Image
-                src={uploadingFile.preview}
                 alt="Uploading preview"
                 className="w-full h-full object-cover rounded"
+                src={uploadingFile.preview}
               />
               <div className="absolute inset-0 bg-black/50 rounded flex items-center justify-center">
-                <Spinner size="sm" color="white" />
+                <Spinner color="white" size="sm" />
               </div>
             </div>
             <div className="space-y-2">
               <p className="text-sm text-default-600">Uploading...</p>
               <div className="w-full bg-default-200 rounded-full h-2">
-                <div 
+                <div
                   className="bg-primary h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadingFile.progress}%` }}
                 />
@@ -216,14 +232,16 @@ export default function ImageUpload({
             </div>
             <Button
               color="primary"
-              variant="flat"
-              startContent={externalUploading ? (
-                <div className="w-4 h-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              ) : (
-                <UploadIcon />
-              )}
               disabled={disabled || externalUploading}
               size="sm"
+              startContent={
+                externalUploading ? (
+                  <div className="w-4 h-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <UploadIcon />
+                )
+              }
+              variant="flat"
               onPress={handleButtonClick}
             >
               {externalUploading ? "Uploading..." : "Choose Image"}
