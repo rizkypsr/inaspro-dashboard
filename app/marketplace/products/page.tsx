@@ -44,6 +44,8 @@ import {
   ProductVariant,
 } from "../../../types/marketplace";
 import { ProtectedRoute } from "../../../components/protected-route";
+import ImageUpload from "../../../components/image-upload";
+import ImageUploadService, { UploadResult } from "../../../lib/services/image-upload-service";
 
 // Icons as SVG components
 const PlusIcon = () => (
@@ -180,7 +182,8 @@ export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [formData, setFormData] = useState<ProductFormData>(initialFormData);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [imageUrl, setImageUrl] = useState("");
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [variantForm, setVariantForm] = useState({
     name: "",
     sku: "",
@@ -239,7 +242,11 @@ export default function ProductsPage() {
     try {
       if (!formData.title || !formData.description || !formData.categoryId) {
         toast.error("Please fill in all required fields");
+        return;
+      }
 
+      if (formData.variants.length === 0) {
+        toast.error("Please add at least one product variant");
         return;
       }
 
@@ -306,21 +313,45 @@ export default function ProductsPage() {
   const resetForm = () => {
     setFormData(initialFormData);
     setEditingProduct(null);
-    setImageUrl("");
+    setUploadError(null);
+    setIsUploadingImage(false);
     setVariantForm({ name: "", sku: "", price: 0, stock: 0 });
   };
 
-  const addImage = () => {
-    if (imageUrl.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        images: [...prev.images, imageUrl.trim()],
-      }));
-      setImageUrl("");
-    }
+  const handleImageUploaded = (result: UploadResult) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: [...prev.images, result.url],
+    }));
+    setUploadError(null);
+    setIsUploadingImage(false);
   };
 
-  const removeImage = (index: number) => {
+  const handleImageUploadError = (error: string) => {
+    setUploadError(error);
+    setIsUploadingImage(false);
+  };
+
+  const handleImageUploadStart = () => {
+    setIsUploadingImage(true);
+    setUploadError(null);
+  };
+
+  const removeImage = async (index: number) => {
+    const imageUrl = formData.images[index];
+    
+    // Extract storage path from URL and delete from Firebase Storage
+    const imagePath = ImageUploadService.extractPathFromURL(imageUrl);
+    if (imagePath) {
+      try {
+        await ImageUploadService.deleteImage(imagePath);
+      } catch (error) {
+        console.error("Failed to delete image from storage:", error);
+        // Continue with removal from form even if storage deletion fails
+      }
+    }
+    
+    // Remove from form data
     setFormData((prev) => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
@@ -589,37 +620,46 @@ export default function ProductsPage() {
                   <span className="text-sm font-medium mb-2 block">
                     Product Images
                   </span>
-                  <div className="flex gap-2 mb-2">
-                    <Input
-                      className="flex-1"
-                      placeholder="Enter image URL"
-                      value={imageUrl}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setImageUrl(e.target.value)
-                      }
+                  
+                  {uploadError && (
+                    <div className="mb-2 p-2 bg-danger-50 border border-danger-200 rounded text-danger-600 text-sm">
+                      {uploadError}
+                    </div>
+                  )}
+                  
+                  <div className="mb-4">
+                    <ImageUpload
+                      onImageUploaded={handleImageUploaded}
+                      onError={handleImageUploadError}
+                      onUploadStart={handleImageUploadStart}
+                      productId={editingProduct?.productId}
+                      isUploading={isUploadingImage}
+                      disabled={isUploadingImage}
                     />
-                    <Button onPress={addImage}>Add</Button>
                   </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {formData.images.map((image, index) => (
-                      <div key={index} className="relative">
-                        <Image
-                          alt={`Product ${index + 1}`}
-                          className="w-full h-20 object-cover rounded"
-                          src={image}
-                        />
-                        <Button
-                          isIconOnly
-                          className="absolute -top-2 -right-2"
-                          color="danger"
-                          size="sm"
-                          onPress={() => removeImage(index)}
-                        >
-                          ×
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
+                  
+                  {formData.images.length > 0 && (
+                    <div className="grid grid-cols-4 gap-2">
+                      {formData.images.map((image, index) => (
+                        <div key={index} className="relative">
+                          <Image
+                            alt={`Product ${index + 1}`}
+                            className="w-full h-20 object-cover rounded"
+                            src={image}
+                          />
+                          <Button
+                            isIconOnly
+                            className="absolute -top-2 -right-2"
+                            color="danger"
+                            size="sm"
+                            onPress={() => removeImage(index)}
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <Divider />
