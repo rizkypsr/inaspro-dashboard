@@ -36,7 +36,7 @@ interface FormData {
   description: string;
   price: number;
   size: string;
-  images: string[];
+  images: string;
 }
 
 const sizeOptions = [
@@ -65,7 +65,7 @@ export default function ShoesTab() {
     description: "",
     price: 0,
     size: "",
-    images: [],
+    images: "",
   });
   const [uploadingImages, setUploadingImages] = useState(false);
 
@@ -99,7 +99,7 @@ export default function ShoesTab() {
       description: "",
       price: 0,
       size: "",
-      images: [],
+      images: "",
     });
     onOpen();
   };
@@ -112,7 +112,7 @@ export default function ShoesTab() {
       description: shoe.description,
       price: shoe.price,
       size: shoe.size.toString(),
-      images: shoe.images || [],
+      images: shoe.images || "",
     });
     onOpen();
   };
@@ -125,7 +125,7 @@ export default function ShoesTab() {
       description: shoe.description,
       price: shoe.price,
       size: shoe.size.toString(),
-      images: shoe.images || [],
+      images: shoe.images?.[0] || "",
     });
     onOpen();
   };
@@ -148,9 +148,9 @@ export default function ShoesTab() {
         const createData: CreateShoeData = {
           name: formData.name,
           description: formData.description,
-          images: formData.images,
           price: formData.price,
           size: parseInt(formData.size),
+          images: formData.images,
           fantasyId: eventId,
         };
 
@@ -166,32 +166,29 @@ export default function ShoesTab() {
   const handleFileUpload = async (files: FileList) => {
     if (!files || files.length === 0) return;
 
+    // Only allow one image for shoes
+    const file = files[0];
+    
     setUploadingImages(true);
     try {
-      const uploadPromises = Array.from(files).map(async (file) => {
-        const fileName = `shoes/${eventId}/${Date.now()}_${file.name}`;
-        const uploadResult = await uploadToFirebaseStorage(fileName, file);
-
-        return uploadResult.downloadURL;
-      });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
+      const fileName = `shoes/${eventId}/${Date.now()}_${file.name}`;
+      const uploadResult = await uploadToFirebaseStorage(fileName, file);
 
       setFormData((prev) => ({
         ...prev,
-        images: [...prev.images, ...uploadedUrls],
+        images: uploadResult.downloadURL, // Set single image
       }));
     } catch (error) {
-      console.error("Error uploading images:", error);
+      console.error("Error uploading image:", error);
     } finally {
       setUploadingImages(false);
     }
   };
 
-  const handleRemoveImage = (index: number) => {
+  const handleRemoveImage = () => {
     setFormData((prev) => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index),
+      images: "",
     }));
   };
 
@@ -388,7 +385,6 @@ export default function ShoesTab() {
                 {(isEditing || !selectedShoe) && (
                   <div className="space-y-2">
                     <input
-                      multiple
                       accept="image/*"
                       className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                       disabled={uploadingImages}
@@ -399,46 +395,44 @@ export default function ShoesTab() {
                     />
                     {uploadingImages && (
                       <p className="text-sm text-blue-600">
-                        Uploading images...
+                        Uploading image...
                       </p>
                     )}
                   </div>
                 )}
 
-                {/* Display existing images */}
-                {formData.images.length > 0 && (
-                  <div className="grid grid-cols-2 gap-3">
-                    {formData.images.map((imageUrl, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          alt={`Shoe`}
-                          className="w-full h-24 object-cover rounded-lg border"
-                          src={imageUrl}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
+                {/* Display existing image */}
+                {formData.images && (
+                  <div className="w-32">
+                    <div className="relative group">
+                      <img
+                        alt={`Shoe`}
+                        className="w-full h-24 object-cover rounded-lg border"
+                        src={formData.images}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
 
-                            target.src = "/placeholder-image.png";
-                          }}
-                        />
-                        {(isEditing || !selectedShoe) && (
-                          <Button
-                            isIconOnly
-                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                            color="danger"
-                            size="sm"
-                            variant="flat"
-                            onPress={() => handleRemoveImage(index)}
-                          >
-                            ×
-                          </Button>
-                        )}
-                      </div>
-                    ))}
+                          target.src = "/placeholder-image.png";
+                        }}
+                      />
+                      {(isEditing || !selectedShoe) && (
+                        <Button
+                          isIconOnly
+                          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          color="danger"
+                          size="sm"
+                          variant="flat"
+                          onPress={() => handleRemoveImage()}
+                        >
+                          ×
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                {formData.images.length === 0 && (
-                  <p className="text-gray-500 text-sm">No images added yet</p>
+                {!formData.images && (
+                  <p className="text-gray-500 text-sm">No image added yet</p>
                 )}
               </div>
             </div>

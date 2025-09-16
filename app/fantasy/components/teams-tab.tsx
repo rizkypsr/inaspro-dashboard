@@ -36,7 +36,7 @@ interface FormData {
   name: string;
   description: string;
   size: string;
-  images: string[];
+  images: string;
 }
 
 // Teams data now loaded from Firestore
@@ -53,7 +53,7 @@ export default function TeamsTab() {
     name: "",
     description: "",
     size: "",
-    images: [],
+    images: "",
   });
   const [uploadingImages, setUploadingImages] = useState<boolean>(false);
 
@@ -86,7 +86,7 @@ export default function TeamsTab() {
       name: "",
       description: "",
       size: "",
-      images: [],
+      images: "",
     });
     onOpen();
   };
@@ -98,7 +98,7 @@ export default function TeamsTab() {
       name: team.name,
       description: team.description,
       size: team.size || "",
-      images: team.images || [],
+      images: team.images || "",
     });
     onOpen();
   };
@@ -110,7 +110,7 @@ export default function TeamsTab() {
       name: team.name,
       description: team.description,
       size: team.size || "",
-      images: team.images || [],
+      images: team.images || "",
     });
     onOpen();
   };
@@ -138,7 +138,7 @@ export default function TeamsTab() {
           name: formData.name.trim(),
           description: formData.description.trim(),
           size: formData.size,
-          images: formData.images || [],
+          images: formData.images || "",
         };
 
         await teamsService.updateTeam(selectedTeam.id, updateData);
@@ -146,7 +146,7 @@ export default function TeamsTab() {
         const createData: CreateTeamData = {
           name: formData.name.trim(),
           description: formData.description.trim(),
-          images: formData.images || [],
+          images: formData.images || "",
           size: formData.size,
           fantasyId: eventId,
         };
@@ -163,32 +163,29 @@ export default function TeamsTab() {
   const handleFileUpload = async (files: FileList) => {
     if (!files || files.length === 0) return;
 
+    // Only allow one image for teams
+    const file = files[0];
+    
     setUploadingImages(true);
     try {
-      const uploadPromises = Array.from(files).map(async (file) => {
-        const fileName = `teams/${eventId}/${Date.now()}_${file.name}`;
-        const uploadResult = await uploadToFirebaseStorage(fileName, file);
-
-        return uploadResult.downloadURL;
-      });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
+      const fileName = `teams/${eventId}/${Date.now()}_${file.name}`;
+      const uploadResult = await uploadToFirebaseStorage(fileName, file);
 
       setFormData((prev) => ({
         ...prev,
-        images: [...prev.images, ...uploadedUrls],
+        images: uploadResult.downloadURL, // Set single image
       }));
     } catch (error) {
-      console.error("Error uploading images:", error);
+      console.error("Error uploading image:", error);
     } finally {
       setUploadingImages(false);
     }
   };
 
-  const handleRemoveImage = (index: number) => {
+  const handleRemoveImage = () => {
     setFormData((prev) => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index),
+      images: "",
     }));
   };
 
@@ -381,7 +378,6 @@ export default function TeamsTab() {
                 {(isEditing || !selectedTeam) && (
                   <div className="space-y-2">
                     <input
-                      multiple
                       accept="image/*"
                       className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                       disabled={uploadingImages}
@@ -392,45 +388,43 @@ export default function TeamsTab() {
                     />
                     {uploadingImages && (
                       <p className="text-sm text-blue-600">
-                        Uploading images...
+                        Uploading image...
                       </p>
                     )}
                   </div>
                 )}
 
-                {/* Display existing images */}
-                {formData.images.length > 0 && (
-                  <div className="grid grid-cols-2 gap-3">
-                    {formData.images.map((imageUrl, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          alt={`Team`}
-                          className="w-full h-24 object-cover rounded-lg border"
-                          src={imageUrl}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
+                {/* Display existing image */}
+                {formData.images && (
+                  <div className="w-32">
+                    <div className="relative group">
+                      <img
+                        alt={`Team`}
+                        className="w-full h-24 object-cover rounded-lg border"
+                        src={formData.images}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
 
-                            target.src = "/placeholder-image.png";
-                          }}
-                        />
-                        {(isEditing || !selectedTeam) && (
-                          <Button
-                            isIconOnly
-                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                            color="danger"
-                            size="sm"
-                            variant="flat"
-                            onPress={() => handleRemoveImage(index)}
-                          >
-                            ×
-                          </Button>
-                        )}
-                      </div>
-                    ))}
+                          target.src = "/placeholder-image.png";
+                        }}
+                      />
+                      {(isEditing || !selectedTeam) && (
+                        <Button
+                          isIconOnly
+                          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          color="danger"
+                          size="sm"
+                          variant="flat"
+                          onPress={() => handleRemoveImage()}
+                        >
+                          ×
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                {formData.images.length === 0 && (
+                {!formData.images && (
                   <p className="text-gray-500 text-sm">No images added yet</p>
                 )}
               </div>

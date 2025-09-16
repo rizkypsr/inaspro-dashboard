@@ -20,7 +20,7 @@ export interface Team {
   id?: string;
   name: string;
   description: string;
-  images: string[]; // Array of image URLs from Firebase Storage
+  images: string; // Single image URL from Firebase Storage
   size: string; // Single size: S, M, L, XL, XXL, XXXL
   fantasyId: string; // reference ke event terkait
   createdAt: Timestamp;
@@ -29,7 +29,7 @@ export interface Team {
 export interface CreateTeamData {
   name: string;
   description: string;
-  images: string[]; // Array of image URLs from Firebase Storage
+  images: string; // Single image URL from Firebase Storage
   size: string;
   fantasyId: string;
 }

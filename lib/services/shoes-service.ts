@@ -22,7 +22,7 @@ export interface Shoe {
   description: string;
   price: number;
   size: number; // Size of the shoe (numeric)
-  images: string[]; // Array of image URLs from Firebase Storage
+  images: string; // Single image URL from Firebase Storage
   fantasyId: string;
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
@@ -33,7 +33,7 @@ export interface CreateShoeData {
   description: string;
   price: number;
   size: number;
-  images: string[]; // Array of image URLs from Firebase Storage
+  images: string; // Single image URL from Firebase Storage
   fantasyId: string;
 }
 
