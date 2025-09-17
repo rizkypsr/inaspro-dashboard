@@ -29,9 +29,9 @@ import {
   UpdateTvCategoryData,
   TvContent,
   CreateTvContentData,
-} from "../../../types/tv";
-import { TvCategoriesService } from "../../../lib/services/tv-categories-service";
-import { TvContentsService } from "../../../lib/services/tv-contents-service";
+} from "../../../../types/tv";
+import { TvCategoriesService } from "../../../../lib/services/tv-categories-service";
+import { TvContentsService } from "../../../../lib/services/tv-contents-service";
 
 import { PlusIcon, PencilIcon, TrashIcon } from "@/components/icons";
 

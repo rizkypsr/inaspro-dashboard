@@ -31,9 +31,9 @@ import { Select, SelectItem } from "@heroui/select";
 import { Spinner } from "@heroui/spinner";
 import { Divider } from "@heroui/divider";
 
-import { ordersService } from "../../../lib/services/marketplace-service";
-import { Order } from "../../../types/marketplace";
-import { ProtectedRoute } from "../../../components/protected-route";
+import { ordersService } from "../../../../lib/services/marketplace-service";
+import { Order } from "../../../../types/marketplace";
+import { ProtectedRoute } from "../../../../components/protected-route";
 
 // Icons as SVG components
 const SearchIcon = () => (

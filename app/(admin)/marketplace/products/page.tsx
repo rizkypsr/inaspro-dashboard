@@ -36,18 +36,18 @@ import { Divider } from "@heroui/divider";
 import {
   productsService,
   categoriesService,
-} from "../../../lib/services/marketplace-service";
+} from "../../../../lib/services/marketplace-service";
 import {
   Product,
   Category,
   CreateProductData,
   ProductVariant,
-} from "../../../types/marketplace";
-import { ProtectedRoute } from "../../../components/protected-route";
-import ImageUpload from "../../../components/image-upload";
+} from "../../../../types/marketplace";
+import { ProtectedRoute } from "../../../../components/protected-route";
+import ImageUpload from "../../../../components/image-upload";
 import ImageUploadService, {
   UploadResult,
-} from "../../../lib/services/image-upload-service";
+} from "../../../../lib/services/image-upload-service";
 
 // Icons as SVG components
 const PlusIcon = () => (

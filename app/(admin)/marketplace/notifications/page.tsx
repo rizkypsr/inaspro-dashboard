@@ -6,9 +6,9 @@ import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Spinner } from "@heroui/spinner";
 
-import { notificationsService } from "../../../lib/services/marketplace-service";
-import { Notification } from "../../../types/marketplace";
-import { ProtectedRoute } from "../../../components/protected-route";
+import { notificationsService } from "../../../../lib/services/marketplace-service";
+import { Notification } from "../../../../types/marketplace";
+import { ProtectedRoute } from "../../../../components/protected-route";
 
 // Icons as SVG components
 const BellIcon = () => (

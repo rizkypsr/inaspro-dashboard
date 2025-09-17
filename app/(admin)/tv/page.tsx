@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardBody } from "@heroui/card";
 
-import TvCategoriesTab from "../fantasy/components/tv-categories-tab";
+import TvCategoriesTab from "../(admin)/fantasy/components/tv-categories-tab";
 
 import { ProtectedRoute } from "@/components/protected-route";
 

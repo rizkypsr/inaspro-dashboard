@@ -31,9 +31,9 @@ import { Select, SelectItem } from "@heroui/select";
 import { Switch } from "@heroui/switch";
 import { Spinner } from "@heroui/spinner";
 
-import { vouchersService } from "../../../lib/services/marketplace-service";
-import { Voucher } from "../../../types/marketplace";
-import { ProtectedRoute } from "../../../components/protected-route";
+import { vouchersService } from "../../../../lib/services/marketplace-service";
+import { Voucher } from "../../../../types/marketplace";
+import { ProtectedRoute } from "../../../../components/protected-route";
 
 // Icons as SVG components
 const PlusIcon = () => (

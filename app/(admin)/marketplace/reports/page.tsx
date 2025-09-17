@@ -21,8 +21,8 @@ import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
 import { Chip } from "@heroui/chip";
 
-import { SalesReport, ExportOptions } from "../../../types/marketplace";
-import { ProtectedRoute } from "../../../components/protected-route";
+import { SalesReport, ExportOptions } from "../../../../types/marketplace";
+import { ProtectedRoute } from "../../../../components/protected-route";
 
 // Icons as SVG components
 const DownloadIcon = () => (

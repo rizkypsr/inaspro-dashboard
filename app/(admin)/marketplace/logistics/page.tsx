@@ -28,9 +28,9 @@ import {
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
 
-import { logisticsService } from "../../../lib/services/marketplace-service";
-import { LogisticsRate } from "../../../types/marketplace";
-import { ProtectedRoute } from "../../../components/protected-route";
+import { logisticsService } from "../../../../lib/services/marketplace-service";
+import { LogisticsRate } from "../../../../types/marketplace";
+import { ProtectedRoute } from "../../../../components/protected-route";
 
 // Icons as SVG components
 const PlusIcon = () => (
