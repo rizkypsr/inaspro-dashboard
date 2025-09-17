@@ -100,10 +100,6 @@ export default function PaymentsTab() {
     }).format(amount);
   };
 
-
-
-
-
   const getTotalAmount = () => {
     return payments
       .filter((payment) => payment.status.toUpperCase() === "PAID")

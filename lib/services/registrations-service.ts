@@ -1,16 +1,17 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  query, 
-  orderBy, 
-  where, 
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  query,
+  orderBy,
+  where,
   Timestamp,
   DocumentData,
-  QuerySnapshot
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+  QuerySnapshot,
+} from "firebase/firestore";
+
+import { db } from "@/lib/firebase";
 
 export interface Registration {
   id?: string;
@@ -27,142 +28,145 @@ export interface Registration {
   registeredAt: Timestamp;
 }
 
-
-
 class RegistrationsService {
   private getCollectionPath(fantasyId: string) {
     return `fantasies/${fantasyId}/registrations`;
   }
 
-
-
   // Get all registrations for a fantasy
-  async getRegistrationsByFantasyId(fantasyId: string): Promise<Registration[]> {
+  async getRegistrationsByFantasyId(
+    fantasyId: string,
+  ): Promise<Registration[]> {
     try {
       const q = query(
         collection(db, this.getCollectionPath(fantasyId)),
-        orderBy('registeredAt', 'desc')
+        orderBy("registeredAt", "desc"),
       );
-      
+
       const querySnapshot: QuerySnapshot<DocumentData> = await getDocs(q);
       const registrations: Registration[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         registrations.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Registration);
       });
-      
+
       return registrations;
     } catch (error) {
-      console.error('Error getting registrations:', error);
-      throw new Error('Failed to fetch registrations');
+      console.error("Error getting registrations:", error);
+      throw new Error("Failed to fetch registrations");
     }
   }
 
   // Get registrations by user ID
-  async getRegistrationsByUserId(fantasyId: string, userId: string): Promise<Registration[]> {
+  async getRegistrationsByUserId(
+    fantasyId: string,
+    userId: string,
+  ): Promise<Registration[]> {
     try {
       const q = query(
         collection(db, this.getCollectionPath(fantasyId)),
-        where('userId', '==', userId),
-        orderBy('registeredAt', 'desc')
+        where("userId", "==", userId),
+        orderBy("registeredAt", "desc"),
       );
-      
+
       const querySnapshot = await getDocs(q);
       const registrations: Registration[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         registrations.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Registration);
       });
-      
+
       return registrations;
     } catch (error) {
-      console.error('Error getting registrations by user ID:', error);
-      throw new Error('Failed to fetch registrations by user ID');
+      console.error("Error getting registrations by user ID:", error);
+      throw new Error("Failed to fetch registrations by user ID");
     }
   }
 
   // Get registrations by payment status
   async getRegistrationsByPaymentStatus(
-    fantasyId: string, 
-    paymentStatus: "pending" | "paid" | "failed" | "expired"
+    fantasyId: string,
+    paymentStatus: "pending" | "paid" | "failed" | "expired",
   ): Promise<Registration[]> {
     try {
       const q = query(
         collection(db, this.getCollectionPath(fantasyId)),
-        where('paymentStatus', '==', paymentStatus),
-        orderBy('registeredAt', 'desc')
+        where("paymentStatus", "==", paymentStatus),
+        orderBy("registeredAt", "desc"),
       );
-      
+
       const querySnapshot = await getDocs(q);
       const registrations: Registration[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         registrations.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Registration);
       });
-      
+
       return registrations;
     } catch (error) {
-      console.error('Error getting registrations by payment status:', error);
-      throw new Error('Failed to fetch registrations by payment status');
+      console.error("Error getting registrations by payment status:", error);
+      throw new Error("Failed to fetch registrations by payment status");
     }
   }
 
   // Get registration by ID
-  async getRegistrationById(fantasyId: string, registrationId: string): Promise<Registration | null> {
+  async getRegistrationById(
+    fantasyId: string,
+    registrationId: string,
+  ): Promise<Registration | null> {
     try {
       const docRef = doc(db, this.getCollectionPath(fantasyId), registrationId);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         return {
           id: docSnap.id,
-          ...docSnap.data()
+          ...docSnap.data(),
         } as Registration;
       } else {
         return null;
       }
     } catch (error) {
-      console.error('Error getting registration:', error);
-      throw new Error('Failed to fetch registration');
+      console.error("Error getting registration:", error);
+      throw new Error("Failed to fetch registration");
     }
   }
 
-
-
-
-
   // Get registrations by team ID
-  async getRegistrationsByTeamId(fantasyId: string, teamId: string): Promise<Registration[]> {
+  async getRegistrationsByTeamId(
+    fantasyId: string,
+    teamId: string,
+  ): Promise<Registration[]> {
     try {
       const q = query(
         collection(db, this.getCollectionPath(fantasyId)),
-        where('teamId', '==', teamId),
-        orderBy('registeredAt', 'desc')
+        where("teamId", "==", teamId),
+        orderBy("registeredAt", "desc"),
       );
-      
+
       const querySnapshot = await getDocs(q);
       const registrations: Registration[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         registrations.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as Registration);
       });
-      
+
       return registrations;
     } catch (error) {
-      console.error('Error getting registrations by team ID:', error);
-      throw new Error('Failed to fetch registrations by team ID');
+      console.error("Error getting registrations by team ID:", error);
+      throw new Error("Failed to fetch registrations by team ID");
     }
   }
 
@@ -170,12 +174,13 @@ class RegistrationsService {
   async getRegistrationsCount(fantasyId: string): Promise<number> {
     try {
       const querySnapshot = await getDocs(
-        collection(db, this.getCollectionPath(fantasyId))
+        collection(db, this.getCollectionPath(fantasyId)),
       );
+
       return querySnapshot.size;
     } catch (error) {
-      console.error('Error getting registrations count:', error);
-      throw new Error('Failed to get registrations count');
+      console.error("Error getting registrations count:", error);
+      throw new Error("Failed to get registrations count");
     }
   }
 
@@ -184,21 +189,22 @@ class RegistrationsService {
     try {
       const q = query(
         collection(db, this.getCollectionPath(fantasyId)),
-        where('paymentStatus', '==', 'paid')
+        where("paymentStatus", "==", "paid"),
       );
-      
+
       const querySnapshot = await getDocs(q);
       let totalRevenue = 0;
-      
+
       querySnapshot.forEach((doc) => {
         const registration = doc.data() as Registration;
+
         totalRevenue += registration.totalPaid;
       });
-      
+
       return totalRevenue;
     } catch (error) {
-      console.error('Error getting total revenue:', error);
-      throw new Error('Failed to calculate total revenue');
+      console.error("Error getting total revenue:", error);
+      throw new Error("Failed to calculate total revenue");
     }
   }
 }

@@ -168,7 +168,7 @@ export default function ShoesTab() {
 
     // Only allow one image for shoes
     const file = files[0];
-    
+
     setUploadingImages(true);
     try {
       const fileName = `shoes/${eventId}/${Date.now()}_${file.name}`;

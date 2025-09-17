@@ -16,12 +16,17 @@ import {
 
 import { db } from "@/lib/firebase";
 
+export interface TShirt {
+  id: string;
+  size: string; // S, M, L, XL, XXL, XXXL
+  image: string; // Image URL from Firebase Storage
+}
+
 export interface Team {
   id?: string;
   name: string;
   description: string;
-  images: string; // Single image URL from Firebase Storage
-  size: string; // Single size: S, M, L, XL, XXL, XXXL
+  tshirts: TShirt[]; // Array of t-shirts with different sizes
   fantasyId: string; // reference ke event terkait
   createdAt: Timestamp;
 }
@@ -29,8 +34,7 @@ export interface Team {
 export interface CreateTeamData {
   name: string;
   description: string;
-  images: string; // Single image URL from Firebase Storage
-  size: string;
+  tshirts: TShirt[];
   fantasyId: string;
 }
 
@@ -155,7 +159,7 @@ class TeamsService {
     }
   }
 
-  // Get teams by size
+  // Get teams that have t-shirts with specific size
   async getTeamsBySize(size: string, fantasyId?: string): Promise<Team[]> {
     try {
       let q;
@@ -163,14 +167,12 @@ class TeamsService {
       if (fantasyId) {
         q = query(
           collection(db, this.collectionName),
-          where("size", "==", size),
           where("fantasyId", "==", fantasyId),
           orderBy("createdAt", "desc"),
         );
       } else {
         q = query(
           collection(db, this.collectionName),
-          where("size", "==", size),
           orderBy("createdAt", "desc"),
         );
       }
@@ -179,10 +181,15 @@ class TeamsService {
       const teams: Team[] = [];
 
       querySnapshot.forEach((doc) => {
-        teams.push({
+        const teamData = {
           id: doc.id,
           ...doc.data(),
-        } as Team);
+        } as Team;
+
+        // Filter teams that have t-shirts with the specified size
+        if (teamData.tshirts && teamData.tshirts.some(tshirt => tshirt.size === size)) {
+          teams.push(teamData);
+        }
       });
 
       return teams;

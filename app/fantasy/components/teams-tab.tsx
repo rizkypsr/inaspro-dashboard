@@ -28,18 +28,14 @@ import {
   teamsService,
   Team,
   CreateTeamData,
+  TShirt,
 } from "@/lib/services/teams-service";
-
-// Team interface is now imported from teams-service
 
 interface FormData {
   name: string;
   description: string;
-  size: string;
-  images: string;
+  tshirts: TShirt[];
 }
-
-// Teams data now loaded from Firestore
 
 export default function TeamsTab() {
   const params = useParams();
@@ -52,8 +48,7 @@ export default function TeamsTab() {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     description: "",
-    size: "",
-    images: "",
+    tshirts: [],
   });
   const [uploadingImages, setUploadingImages] = useState<boolean>(false);
 
@@ -70,7 +65,6 @@ export default function TeamsTab() {
     setLoading(true);
     try {
       const teamsData = await teamsService.getTeamsByFantasyId(eventId);
-
       setTeams(teamsData);
     } catch (error) {
       console.error("Error loading teams:", error);
@@ -79,15 +73,19 @@ export default function TeamsTab() {
     }
   };
 
-  const handleAdd = () => {
-    setSelectedTeam(null);
-    setIsEditing(false);
+  const resetForm = () => {
     setFormData({
       name: "",
       description: "",
-      size: "",
-      images: "",
+      tshirts: [],
     });
+    setValidationErrors({});
+  };
+
+  const handleAdd = () => {
+    setSelectedTeam(null);
+    setIsEditing(false);
+    resetForm();
     onOpen();
   };
 
@@ -97,8 +95,7 @@ export default function TeamsTab() {
     setFormData({
       name: team.name,
       description: team.description,
-      size: team.size || "",
-      images: team.images || "",
+      tshirts: team.tshirts || [],
     });
     onOpen();
   };
@@ -109,36 +106,50 @@ export default function TeamsTab() {
     setFormData({
       name: team.name,
       description: team.description,
-      size: team.size || "",
-      images: team.images || "",
+      tshirts: team.tshirts || [],
     });
     onOpen();
+  };
+
+  const [validationErrors, setValidationErrors] = useState<{
+    name?: string;
+    description?: string;
+    tshirts?: string;
+  }>({});
+
+  const validateForm = (): boolean => {
+    const errors: typeof validationErrors = {};
+
+    if (!formData.name.trim()) {
+      errors.name = "Team name is required";
+    }
+
+    if (!formData.description.trim()) {
+      errors.description = "Team description is required";
+    }
+
+    if (formData.tshirts.length === 0) {
+      errors.tshirts = "At least one t-shirt is required";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSave = async () => {
     if (!eventId) return;
 
-    // Validate required fields
-    if (!formData.name.trim()) {
-      console.error("Team name is required");
-
-      return;
-    }
-
-    if (!formData.description.trim()) {
-      console.error("Team description is required");
-
+    // Validate form
+    if (!validateForm()) {
       return;
     }
 
     try {
       if (isEditing && selectedTeam?.id) {
-        const updateData = {
-          ...formData,
+        const updateData: Partial<CreateTeamData> = {
           name: formData.name.trim(),
           description: formData.description.trim(),
-          size: formData.size,
-          images: formData.images || "",
+          tshirts: formData.tshirts,
         };
 
         await teamsService.updateTeam(selectedTeam.id, updateData);
@@ -146,34 +157,62 @@ export default function TeamsTab() {
         const createData: CreateTeamData = {
           name: formData.name.trim(),
           description: formData.description.trim(),
-          images: formData.images || "",
-          size: formData.size,
+          tshirts: formData.tshirts,
           fantasyId: eventId,
         };
 
         await teamsService.createTeam(createData);
       }
       await loadTeams();
+      setValidationErrors({});
       onClose();
     } catch (error) {
       console.error("Error saving team:", error);
     }
   };
 
-  const handleFileUpload = async (files: FileList) => {
+  const handleAddTShirt = () => {
+    const newTShirt: TShirt = {
+      id: Date.now().toString(),
+      size: "M",
+      image: "",
+    };
+    setFormData(prev => ({
+      ...prev,
+      tshirts: [...prev.tshirts, newTShirt],
+    }));
+  };
+
+  const handleRemoveTShirt = (tshirtId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tshirts: prev.tshirts.filter(t => t.id !== tshirtId),
+    }));
+  };
+
+  const handleTShirtSizeChange = (tshirtId: string, size: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tshirts: prev.tshirts.map(t => 
+        t.id === tshirtId ? { ...t, size } : t
+      ),
+    }));
+  };
+
+  const handleFileUpload = async (files: FileList, tshirtId: string) => {
     if (!files || files.length === 0) return;
 
-    // Only allow one image for teams
     const file = files[0];
-    
     setUploadingImages(true);
     try {
       const fileName = `teams/${eventId}/${Date.now()}_${file.name}`;
       const uploadResult = await uploadToFirebaseStorage(fileName, file);
 
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
-        images: uploadResult.downloadURL, // Set single image
+        tshirts: prev.tshirts.map(t => 
+          t.id === tshirtId ? { ...t, image: uploadResult.downloadURL } : t
+        ),
       }));
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -182,25 +221,24 @@ export default function TeamsTab() {
     }
   };
 
-  const handleRemoveImage = () => {
-    setFormData((prev) => ({
+  const handleRemoveImage = (tshirtId: string) => {
+    setFormData(prev => ({
       ...prev,
-      images: "",
+      tshirts: prev.tshirts.map(t => 
+        t.id === tshirtId ? { ...t, image: "" } : t
+      ),
     }));
   };
 
   const uploadToFirebaseStorage = async (filePath: string, file: File) => {
     try {
-      // Convert file to base64 for Firebase Storage upload
       const fileContent = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
-
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
 
-      // Upload to Firebase Storage using MCP
       const response = await fetch("/api/firebase/storage/upload", {
         method: "POST",
         headers: {
@@ -218,7 +256,6 @@ export default function TeamsTab() {
       }
 
       const result = await response.json();
-
       return { downloadURL: result.downloadUrl };
     } catch (error) {
       console.error("Error uploading to Firebase Storage:", error);
@@ -235,6 +272,10 @@ export default function TeamsTab() {
     } catch (error) {
       console.error("Error deleting team:", error);
     }
+  };
+
+  const getTeamSizes = (team: Team): string[] => {
+    return team.tshirts?.map(t => t.size) || [];
   };
 
   if (!eventId) {
@@ -261,7 +302,7 @@ export default function TeamsTab() {
         <TableHeader>
           <TableColumn>TEAM NAME</TableColumn>
           <TableColumn>DESCRIPTION</TableColumn>
-          <TableColumn>SIZE</TableColumn>
+          <TableColumn>T-SHIRT SIZES</TableColumn>
           <TableColumn>CREATED DATE</TableColumn>
           <TableColumn>ACTIONS</TableColumn>
         </TableHeader>
@@ -271,13 +312,17 @@ export default function TeamsTab() {
               <TableCell>{team.name}</TableCell>
               <TableCell>{team.description}</TableCell>
               <TableCell>
-                {team.size ? (
-                  <Chip color="primary" size="sm" variant="flat">
-                    {team.size}
-                  </Chip>
-                ) : (
-                  <span className="text-gray-400">No size</span>
-                )}
+                <div className="flex flex-wrap gap-1">
+                  {getTeamSizes(team).length > 0 ? (
+                    getTeamSizes(team).map((size, index) => (
+                      <Chip key={index} color="primary" size="sm" variant="flat">
+                        {size}
+                      </Chip>
+                    ))
+                  ) : (
+                    <span className="text-gray-400">No t-shirts</span>
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 {team.createdAt?.toDate().toLocaleDateString()}
@@ -316,8 +361,8 @@ export default function TeamsTab() {
         </TableBody>
       </Table>
 
-      <Modal isOpen={isOpen} size="2xl" onClose={onClose}>
-        <ModalContent>
+      <Modal isOpen={isOpen} size="4xl" onClose={onClose} scrollBehavior="inside">
+        <ModalContent className="max-h-[90vh]">
           <ModalHeader>
             {isEditing
               ? "Edit Team"
@@ -325,107 +370,156 @@ export default function TeamsTab() {
                 ? "Team Details"
                 : "Add New Team"}
           </ModalHeader>
-          <ModalBody>
+          <ModalBody className="overflow-y-auto">
             <div className="space-y-4">
               <Input
                 isReadOnly={!!(selectedTeam && !isEditing)}
                 label="Team Name"
+                placeholder="Enter team name"
                 value={formData.name}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
+                isRequired
+                isInvalid={!!validationErrors.name}
+                errorMessage={validationErrors.name}
               />
               <Textarea
                 isReadOnly={!!(selectedTeam && !isEditing)}
                 label="Description"
+                placeholder="Enter team description"
                 value={formData.description}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
+                isRequired
+                isInvalid={!!validationErrors.description}
+                errorMessage={validationErrors.description}
               />
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="size">
-                  Available Sizes
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {["S", "M", "L", "XL", "XXL", "XXXL"].map((size) => (
+
+              {/* T-Shirts Section */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center sticky top-0 bg-white z-10 py-2">
+                  <label className="text-sm font-medium">T-Shirts *</label>
+                  {(!selectedTeam || isEditing) && (
                     <Button
-                      key={size}
-                      color={formData.size === size ? "primary" : "default"}
-                      isDisabled={!!(selectedTeam && !isEditing)}
+                      color="primary"
                       size="sm"
-                      variant={formData.size === size ? "solid" : "bordered"}
-                      onPress={() => {
-                        if (selectedTeam && !isEditing) return;
-                        const newSize = formData.size === size ? "" : size;
-
-                        setFormData({ ...formData, size: newSize });
-                      }}
+                      variant="bordered"
+                      onPress={handleAddTShirt}
                     >
-                      {size}
+                      Add T-Shirt
                     </Button>
-                  ))}
+                  )}
                 </div>
-              </div>
 
-              {/* Images Section */}
-              <div className="space-y-3">
-                <label className="text-sm font-medium" htmlFor="images">
-                  Images
-                </label>
-
-                {/* Add new image */}
-                {(isEditing || !selectedTeam) && (
-                  <div className="space-y-2">
-                    <input
-                      accept="image/*"
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                      disabled={uploadingImages}
-                      type="file"
-                      onChange={(e) =>
-                        e.target.files && handleFileUpload(e.target.files)
-                      }
-                    />
-                    {uploadingImages && (
-                      <p className="text-sm text-blue-600">
-                        Uploading image...
-                      </p>
-                    )}
+                {validationErrors.tshirts && (
+                  <div className="text-red-500 text-sm">
+                    {validationErrors.tshirts}
                   </div>
                 )}
 
-                {/* Display existing image */}
-                {formData.images && (
-                  <div className="w-32">
-                    <div className="relative group">
-                      <img
-                        alt={`Team`}
-                        className="w-full h-24 object-cover rounded-lg border"
-                        src={formData.images}
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
+                {formData.tshirts.length === 0 ? (
+                  <p className="text-gray-500 text-sm">No t-shirts added yet</p>
+                ) : (
+                  <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                    {formData.tshirts.map((tshirt, index) => (
+                      <div key={tshirt.id} className="border rounded-lg p-4 space-y-3 bg-gray-50">
+                        <div className="flex justify-between items-center">
+                          <h4 className="font-medium">T-Shirt #{index + 1}</h4>
+                          {(!selectedTeam || isEditing) && (
+                            <Button
+                              isIconOnly
+                              color="danger"
+                              size="sm"
+                              variant="light"
+                              onPress={() => handleRemoveTShirt(tshirt.id)}
+                            >
+                              <TrashIcon />
+                            </Button>
+                          )}
+                        </div>
 
-                          target.src = "/placeholder-image.png";
-                        }}
-                      />
-                      {(isEditing || !selectedTeam) && (
-                        <Button
-                          isIconOnly
-                          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                          color="danger"
-                          size="sm"
-                          variant="flat"
-                          onPress={() => handleRemoveImage()}
-                        >
-                          ×
-                        </Button>
-                      )}
-                    </div>
+                        {/* Size Selection */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Size *</label>
+                          <div className="flex flex-wrap gap-2">
+                            {["S", "M", "L", "XL", "XXL", "XXXL"].map((size) => (
+                              <Button
+                                key={size}
+                                color={tshirt.size === size ? "primary" : "default"}
+                                isDisabled={!!(selectedTeam && !isEditing)}
+                                size="sm"
+                                variant={tshirt.size === size ? "solid" : "bordered"}
+                                onPress={() => {
+                                  if (selectedTeam && !isEditing) return;
+                                  handleTShirtSizeChange(tshirt.id, size);
+                                }}
+                              >
+                                {size}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Image Upload */}
+                        <div className="space-y-3">
+                          <label className="text-sm font-medium">Image</label>
+
+                          {(!selectedTeam || isEditing) && (
+                            <div className="space-y-2">
+                              <input
+                                accept="image/*"
+                                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                disabled={uploadingImages}
+                                type="file"
+                                onChange={(e) =>
+                                  e.target.files && handleFileUpload(e.target.files, tshirt.id)
+                                }
+                              />
+                              {uploadingImages && (
+                                <p className="text-sm text-blue-600">
+                                  Uploading image...
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {tshirt.image && (
+                            <div className="w-32">
+                              <div className="relative group">
+                                <img
+                                  alt={`T-Shirt ${tshirt.size}`}
+                                  className="w-full h-24 object-cover rounded-lg border"
+                                  src={tshirt.image}
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = "/placeholder-image.png";
+                                  }}
+                                />
+                                {(!selectedTeam || isEditing) && (
+                                  <Button
+                                    isIconOnly
+                                    className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    color="danger"
+                                    size="sm"
+                                    variant="flat"
+                                    onPress={() => handleRemoveImage(tshirt.id)}
+                                  >
+                                    ×
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {!tshirt.image && (
+                            <p className="text-gray-500 text-sm">No image added yet</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )}
-
-                {!formData.images && (
-                  <p className="text-gray-500 text-sm">No images added yet</p>
                 )}
               </div>
             </div>

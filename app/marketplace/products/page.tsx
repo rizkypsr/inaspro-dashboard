@@ -726,7 +726,9 @@ export default function ProductsPage() {
                       }
                     />
                     <div className="flex items-end">
-                      <Button color="primary" onPress={addVariant}>Add</Button>
+                      <Button color="primary" onPress={addVariant}>
+                        Add
+                      </Button>
                     </div>
                   </div>
 
@@ -750,7 +752,9 @@ export default function ProductsPage() {
                           </div>
                           <div className="grid grid-cols-3 gap-2 text-sm text-default-600">
                             <span>SKU: {variant.sku}</span>
-                            <span>Price: Rp {variant.price.toLocaleString()}</span>
+                            <span>
+                              Price: Rp {variant.price.toLocaleString()}
+                            </span>
                             <span>Stock: {variant.stock}</span>
                           </div>
                         </div>
