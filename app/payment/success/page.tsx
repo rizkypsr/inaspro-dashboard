@@ -64,24 +64,6 @@ export default function PaymentSuccessPage() {
             Thank you for your payment. Your transaction has been processed
             successfully.
           </p>
-
-          <div className="space-y-3">
-            <a
-              href="/"
-              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-            >
-              <HomeIcon />
-              Back to Home
-            </a>
-
-            <a
-              href="/orders"
-              className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-medium py-3 px-4 rounded-lg transition-colors"
-            >
-              View Orders
-              <ArrowRightIcon />
-            </a>
-          </div>
         </CardBody>
       </Card>
     </div>

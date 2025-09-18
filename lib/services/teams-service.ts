@@ -187,7 +187,10 @@ class TeamsService {
         } as Team;
 
         // Filter teams that have t-shirts with the specified size
-        if (teamData.tshirts && teamData.tshirts.some(tshirt => tshirt.size === size)) {
+        if (
+          teamData.tshirts &&
+          teamData.tshirts.some((tshirt) => tshirt.size === size)
+        ) {
           teams.push(teamData);
         }
       });

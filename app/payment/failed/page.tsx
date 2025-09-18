@@ -82,32 +82,6 @@ export default function PaymentFailedPage() {
             We couldn&apos;t process your payment. Please try again or contact
             support if the problem persists.
           </p>
-
-          <div className="space-y-3">
-            <a
-              href="/"
-              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-            >
-              <HomeIcon />
-              Back to Home
-            </a>
-
-            <a
-              href="/payment"
-              className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-medium py-3 px-4 rounded-lg transition-colors"
-            >
-              <RefreshIcon />
-              Try Again
-            </a>
-
-            <a
-              href="/support"
-              className="w-full flex items-center justify-center gap-2 bg-orange-100 hover:bg-orange-200 dark:bg-orange-900 dark:hover:bg-orange-800 text-orange-900 dark:text-orange-100 font-medium py-3 px-4 rounded-lg transition-colors"
-            >
-              <SupportIcon />
-              Contact Support
-            </a>
-          </div>
         </CardBody>
       </Card>
     </div>
