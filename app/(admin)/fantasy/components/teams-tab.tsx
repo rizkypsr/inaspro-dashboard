@@ -65,6 +65,7 @@ export default function TeamsTab() {
     setLoading(true);
     try {
       const teamsData = await teamsService.getTeamsByFantasyId(eventId);
+
       setTeams(teamsData);
     } catch (error) {
       console.error("Error loading teams:", error);
@@ -133,6 +134,7 @@ export default function TeamsTab() {
     }
 
     setValidationErrors(errors);
+
     return Object.keys(errors).length === 0;
   };
 
@@ -177,24 +179,25 @@ export default function TeamsTab() {
       size: "M",
       image: "",
     };
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
       tshirts: [...prev.tshirts, newTShirt],
     }));
   };
 
   const handleRemoveTShirt = (tshirtId: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tshirts: prev.tshirts.filter(t => t.id !== tshirtId),
+      tshirts: prev.tshirts.filter((t) => t.id !== tshirtId),
     }));
   };
 
   const handleTShirtSizeChange = (tshirtId: string, size: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tshirts: prev.tshirts.map(t => 
-        t.id === tshirtId ? { ...t, size } : t
+      tshirts: prev.tshirts.map((t) =>
+        t.id === tshirtId ? { ...t, size } : t,
       ),
     }));
   };
@@ -203,15 +206,16 @@ export default function TeamsTab() {
     if (!files || files.length === 0) return;
 
     const file = files[0];
+
     setUploadingImages(true);
     try {
       const fileName = `teams/${eventId}/${Date.now()}_${file.name}`;
       const uploadResult = await uploadToFirebaseStorage(fileName, file);
 
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tshirts: prev.tshirts.map(t => 
-          t.id === tshirtId ? { ...t, image: uploadResult.downloadURL } : t
+        tshirts: prev.tshirts.map((t) =>
+          t.id === tshirtId ? { ...t, image: uploadResult.downloadURL } : t,
         ),
       }));
     } catch (error) {
@@ -222,10 +226,10 @@ export default function TeamsTab() {
   };
 
   const handleRemoveImage = (tshirtId: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tshirts: prev.tshirts.map(t => 
-        t.id === tshirtId ? { ...t, image: "" } : t
+      tshirts: prev.tshirts.map((t) =>
+        t.id === tshirtId ? { ...t, image: "" } : t,
       ),
     }));
   };
@@ -234,6 +238,7 @@ export default function TeamsTab() {
     try {
       const fileContent = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
+
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = reject;
         reader.readAsDataURL(file);
@@ -256,6 +261,7 @@ export default function TeamsTab() {
       }
 
       const result = await response.json();
+
       return { downloadURL: result.downloadUrl };
     } catch (error) {
       console.error("Error uploading to Firebase Storage:", error);
@@ -275,7 +281,7 @@ export default function TeamsTab() {
   };
 
   const getTeamSizes = (team: Team): string[] => {
-    return team.tshirts?.map(t => t.size) || [];
+    return team.tshirts?.map((t) => t.size) || [];
   };
 
   if (!eventId) {
@@ -315,7 +321,12 @@ export default function TeamsTab() {
                 <div className="flex flex-wrap gap-1">
                   {getTeamSizes(team).length > 0 ? (
                     getTeamSizes(team).map((size, index) => (
-                      <Chip key={index} color="primary" size="sm" variant="flat">
+                      <Chip
+                        key={index}
+                        color="primary"
+                        size="sm"
+                        variant="flat"
+                      >
                         {size}
                       </Chip>
                     ))
@@ -361,7 +372,12 @@ export default function TeamsTab() {
         </TableBody>
       </Table>
 
-      <Modal isOpen={isOpen} size="4xl" onClose={onClose} scrollBehavior="inside">
+      <Modal
+        isOpen={isOpen}
+        scrollBehavior="inside"
+        size="4xl"
+        onClose={onClose}
+      >
         <ModalContent className="max-h-[90vh]">
           <ModalHeader>
             {isEditing
@@ -373,6 +389,9 @@ export default function TeamsTab() {
           <ModalBody className="overflow-y-auto">
             <div className="space-y-4">
               <Input
+                isRequired
+                errorMessage={validationErrors.name}
+                isInvalid={!!validationErrors.name}
                 isReadOnly={!!(selectedTeam && !isEditing)}
                 label="Team Name"
                 placeholder="Enter team name"
@@ -380,11 +399,11 @@ export default function TeamsTab() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                isRequired
-                isInvalid={!!validationErrors.name}
-                errorMessage={validationErrors.name}
               />
               <Textarea
+                isRequired
+                errorMessage={validationErrors.description}
+                isInvalid={!!validationErrors.description}
                 isReadOnly={!!(selectedTeam && !isEditing)}
                 label="Description"
                 placeholder="Enter team description"
@@ -392,15 +411,12 @@ export default function TeamsTab() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                isRequired
-                isInvalid={!!validationErrors.description}
-                errorMessage={validationErrors.description}
               />
 
               {/* T-Shirts Section */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center sticky top-0 bg-white z-10 py-2">
-                  <label className="text-sm font-medium">T-Shirts *</label>
+                  <span className="text-sm font-medium">T-Shirts *</span>
                   {(!selectedTeam || isEditing) && (
                     <Button
                       color="primary"
@@ -424,7 +440,10 @@ export default function TeamsTab() {
                 ) : (
                   <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
                     {formData.tshirts.map((tshirt, index) => (
-                      <div key={tshirt.id} className="border rounded-lg p-4 space-y-3 bg-gray-50">
+                      <div
+                        key={tshirt.id}
+                        className="border rounded-lg p-4 space-y-3 bg-gray-50"
+                      >
                         <div className="flex justify-between items-center">
                           <h4 className="font-medium">T-Shirt #{index + 1}</h4>
                           {(!selectedTeam || isEditing) && (
@@ -442,29 +461,35 @@ export default function TeamsTab() {
 
                         {/* Size Selection */}
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">Size *</label>
+                          <span className="text-sm font-medium">Size *</span>
                           <div className="flex flex-wrap gap-2">
-                            {["S", "M", "L", "XL", "XXL", "XXXL"].map((size) => (
-                              <Button
-                                key={size}
-                                color={tshirt.size === size ? "primary" : "default"}
-                                isDisabled={!!(selectedTeam && !isEditing)}
-                                size="sm"
-                                variant={tshirt.size === size ? "solid" : "bordered"}
-                                onPress={() => {
-                                  if (selectedTeam && !isEditing) return;
-                                  handleTShirtSizeChange(tshirt.id, size);
-                                }}
-                              >
-                                {size}
-                              </Button>
-                            ))}
+                            {["S", "M", "L", "XL", "XXL", "XXXL"].map(
+                              (size) => (
+                                <Button
+                                  key={size}
+                                  color={
+                                    tshirt.size === size ? "primary" : "default"
+                                  }
+                                  isDisabled={!!(selectedTeam && !isEditing)}
+                                  size="sm"
+                                  variant={
+                                    tshirt.size === size ? "solid" : "bordered"
+                                  }
+                                  onPress={() => {
+                                    if (selectedTeam && !isEditing) return;
+                                    handleTShirtSizeChange(tshirt.id, size);
+                                  }}
+                                >
+                                  {size}
+                                </Button>
+                              ),
+                            )}
                           </div>
                         </div>
 
                         {/* Image Upload */}
                         <div className="space-y-3">
-                          <label className="text-sm font-medium">Image</label>
+                          <span className="text-sm font-medium">Image</span>
 
                           {(!selectedTeam || isEditing) && (
                             <div className="space-y-2">
@@ -474,7 +499,8 @@ export default function TeamsTab() {
                                 disabled={uploadingImages}
                                 type="file"
                                 onChange={(e) =>
-                                  e.target.files && handleFileUpload(e.target.files, tshirt.id)
+                                  e.target.files &&
+                                  handleFileUpload(e.target.files, tshirt.id)
                                 }
                               />
                               {uploadingImages && (
@@ -494,6 +520,7 @@ export default function TeamsTab() {
                                   src={tshirt.image}
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
+
                                     target.src = "/placeholder-image.png";
                                   }}
                                 />
@@ -514,7 +541,9 @@ export default function TeamsTab() {
                           )}
 
                           {!tshirt.image && (
-                            <p className="text-gray-500 text-sm">No image added yet</p>
+                            <p className="text-gray-500 text-sm">
+                              No image added yet
+                            </p>
                           )}
                         </div>
                       </div>

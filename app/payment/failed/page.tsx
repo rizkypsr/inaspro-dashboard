@@ -1,10 +1,4 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { Card, CardBody } from '@heroui/card';
-import { Button } from '@heroui/button';
-import { Spinner } from '@heroui/spinner';
+import { Card, CardBody } from "@heroui/card";
 
 // Custom SVG Icons
 const XCircleIcon = () => (
@@ -72,86 +66,50 @@ const SupportIcon = () => (
 );
 
 export default function PaymentFailedPage() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const [paymentDetails, setPaymentDetails] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Extract payment details from URL parameters
-    const externalId = searchParams.get('external_id');
-    const amount = searchParams.get('amount');
-    const paymentMethod = searchParams.get('payment_method');
-    const failureReason = searchParams.get('failure_reason');
-    const invoiceId = searchParams.get('invoice_id');
-    const failedAt = searchParams.get('failed_at');
-
-    if (externalId || amount) {
-      setPaymentDetails({
-        externalId,
-        amount: amount ? parseInt(amount) : null,
-        paymentMethod,
-        failureReason,
-        invoiceId,
-        failedAt: failedAt ? new Date(failedAt).toLocaleString() : null,
-      });
-    }
-
-    setLoading(false);
-  }, [searchParams]);
-
-  const handleRetryPayment = () => {
-    // Redirect back to fantasy page to retry payment
-    router.push('/fantasy');
-  };
-
-  const handleBackToHome = () => {
-    router.push('/');
-  };
-
-  const handleContactSupport = () => {
-    // You can implement contact support functionality here
-    // For now, just redirect to home with a query parameter
-    router.push('/?contact=support');
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-rose-100">
-        <Spinner size="lg" color="danger" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-rose-100 p-4 flex items-center justify-center">
-      <div className="w-full max-w-sm mx-auto">
-        <Card className="shadow-xl border-0">
-          <CardBody className="text-center p-8">
-            {/* Failed Icon */}
-            <div className="flex justify-center mb-6">
-              <div className="bg-red-100 rounded-full p-4">
-                <XCircleIcon />
-              </div>
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+      <Card className="w-full max-w-md">
+        <CardBody className="text-center p-8">
+          <div className="flex justify-center mb-6">
+            <XCircleIcon />
+          </div>
 
-            {/* Failed Message */}
-            <h1 className="text-2xl font-bold text-gray-900 mb-3">
-              Payment Failed
-            </h1>
-            <p className="text-gray-600 mb-6">
-              We couldn't process your payment. Please try again or contact support if the problem persists.
-            </p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Payment Failed
+          </h1>
 
-            {/* Return to App Instruction */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
-              <p className="text-sm text-blue-800 font-medium">
-                Please return to the app to try again or contact support.
-              </p>
-            </div>
-          </CardBody>
-        </Card>
-      </div>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            We couldn&apos;t process your payment. Please try again or contact
+            support if the problem persists.
+          </p>
+
+          <div className="space-y-3">
+            <a
+              href="/"
+              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            >
+              <HomeIcon />
+              Back to Home
+            </a>
+
+            <a
+              href="/payment"
+              className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            >
+              <RefreshIcon />
+              Try Again
+            </a>
+
+            <a
+              href="/support"
+              className="w-full flex items-center justify-center gap-2 bg-orange-100 hover:bg-orange-200 dark:bg-orange-900 dark:hover:bg-orange-800 text-orange-900 dark:text-orange-100 font-medium py-3 px-4 rounded-lg transition-colors"
+            >
+              <SupportIcon />
+              Contact Support
+            </a>
+          </div>
+        </CardBody>
+      </Card>
     </div>
   );
 }

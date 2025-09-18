@@ -1,9 +1,9 @@
 import "@/styles/globals.css";
 import clsx from "clsx";
 
-import { fontSans } from "@/config/fonts";
-import { AdminLayout } from "@/components/admin-layout";
 import { Providers } from "./providers";
+
+import { fontSans } from "@/config/fonts";
 
 export default function RootLayout({
   children,
